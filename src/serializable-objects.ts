@@ -1,7 +1,6 @@
 import fromPairs from 'lodash/fromPairs';
 import 'reflect-metadata';
 import {
-  Creatable,
   DeserializeOptions,
   SArray,
   SArrayError,
@@ -49,7 +48,7 @@ export function getAllSerializablePropertiesOrWrappers(targetInstance: Object) {
 }
 
 /** Serializable record where props are defined via serialize and serializeAs. */
-export class SObject extends Creatable implements Serializable {
+export class SObject extends Serializable {
   deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
     return this.wrapSArrayError(() =>
       this.toSArray().deserialize(buffer, opts)
@@ -68,9 +67,7 @@ export class SObject extends Creatable implements Serializable {
 
   /** Converts this object to an SArray<Serializable>. */
   toSArray() {
-    return SArray.create({
-      value: getAllSerializablePropertiesOrWrappers(this),
-    });
+    return SArray.of(getAllSerializablePropertiesOrWrappers(this));
   }
 
   toJSON() {
@@ -80,6 +77,13 @@ export class SObject extends Creatable implements Serializable {
         (this as any)[propertyKey],
       ])
     );
+  }
+
+  /** Create a new instance with the provided initial properties. */
+  static with<T extends SObject>(this: new () => T, props: Partial<T> = {}): T {
+    const instance = new this();
+    Object.assign(instance, props);
+    return instance;
   }
 
   private wrapSArrayError<FnT extends () => any>(fn: FnT): ReturnType<FnT> {

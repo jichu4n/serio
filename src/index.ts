@@ -1,5 +1,4 @@
 export * from './serializable';
-export * from './creatable';
 export * from './serializable-wrapper';
 export * from './serializable-scalars';
 export * from './serializable-strings';

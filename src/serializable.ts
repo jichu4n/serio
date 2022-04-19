@@ -20,16 +20,27 @@ export interface SerializeOptions {
 
 /** A value that can be serialized / deserialized.
  *
- * This is the base interface that all serializable types should implement.
+ * This is the base class that all serializable types should extend.
  */
-export interface Serializable {
+export abstract class Serializable {
   /** Deserializes a buffer into this value.
    *
    * @returns Number of bytes read.
    */
-  deserialize(buffer: Buffer, opts?: DeserializeOptions): number;
+  abstract deserialize(buffer: Buffer, opts?: DeserializeOptions): number;
   /** Serializes this value into a buffer. */
-  serialize(opts?: SerializeOptions): Buffer;
+  abstract serialize(opts?: SerializeOptions): Buffer;
   /** Computes the serialized length of this value. */
-  getSerializedLength(opts?: SerializeOptions): number;
+  abstract getSerializedLength(opts?: SerializeOptions): number;
+
+  /** Creates a new instance of this value by deserializing from a buffer. */
+  static from<T extends Serializable>(
+    this: new () => T,
+    buffer: Buffer,
+    opts?: DeserializeOptions
+  ): T {
+    const instance = new this();
+    instance.deserialize(buffer, opts);
+    return instance;
+  }
 }

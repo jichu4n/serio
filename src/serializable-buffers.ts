@@ -1,12 +1,7 @@
-import {
-  Creatable,
-  DeserializeOptions,
-  SerializableWrapper,
-  SerializeOptions,
-} from '.';
+import {DeserializeOptions, SerializableWrapper, SerializeOptions} from '.';
 
 /** No-op Serializable implementation that serializes to / from Buffers. */
-export class SBuffer extends Creatable implements SerializableWrapper<Buffer> {
+export class SBuffer extends SerializableWrapper<Buffer> {
   value: Buffer = Buffer.alloc(0);
 
   deserialize(buffer: Buffer) {
@@ -22,19 +17,12 @@ export class SBuffer extends Creatable implements SerializableWrapper<Buffer> {
   getSerializedLength() {
     return this.value.length;
   }
-
-  toJSON() {
-    return this.value.toJSON();
-  }
 }
 
 /** A Buffer encoded as a number N followed by N bytes. */
 export abstract class SDynamicBuffer<
-    LengthT extends SerializableWrapper<number>
-  >
-  extends SBuffer
-  implements SerializableWrapper<Buffer>
-{
+  LengthT extends SerializableWrapper<number>
+> extends SBuffer {
   /** Length type, to be provided by child classes. */
   protected abstract lengthType: new () => LengthT;
 

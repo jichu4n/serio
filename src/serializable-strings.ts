@@ -3,7 +3,7 @@ import {SmartBuffer} from 'smart-buffer';
 import {DeserializeOptions, SerializableWrapper, SerializeOptions} from '.';
 
 /** Serializable wrapper class for null-terminated strings. */
-export class SStringNT implements SerializableWrapper<string> {
+export class SStringNT extends SerializableWrapper<string> {
   value: string = '';
 
   deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
