@@ -1,13 +1,14 @@
 import fromPairs from 'lodash/fromPairs';
 import 'reflect-metadata';
-import {Creatable} from './creatable';
 import {
+  Creatable,
   DeserializeOptions,
+  SArray,
+  SArrayError,
   Serializable,
+  SerializableWrapper,
   SerializeOptions,
-} from './serializable';
-import {SArray, SArrayError} from './serializable-arrays';
-import {SerializableWrapper} from './serializable-wrapper';
+} from '.';
 
 /** Key for storing property information on an SObject's metadata. */
 export const SERIALIZABLE_PROPERTY_SPECS_METADATA_KEY = Symbol(

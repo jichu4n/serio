@@ -1,7 +1,6 @@
 import iconv from 'iconv-lite';
 import {SmartBuffer} from 'smart-buffer';
-import {DeserializeOptions, SerializeOptions} from './serializable';
-import {SerializableWrapper} from './serializable-wrapper';
+import {DeserializeOptions, SerializableWrapper, SerializeOptions} from '.';
 
 /** Serializable wrapper class for null-terminated strings. */
 export class SStringNT implements SerializableWrapper<string> {

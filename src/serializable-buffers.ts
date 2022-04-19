@@ -1,6 +1,9 @@
-import {Creatable} from './creatable';
-import {DeserializeOptions, SerializeOptions} from './serializable';
-import {SerializableWrapper} from './serializable-wrapper';
+import {
+  Creatable,
+  DeserializeOptions,
+  SerializableWrapper,
+  SerializeOptions,
+} from '.';
 
 /** No-op Serializable implementation that serializes to / from Buffers. */
 export class SBuffer extends Creatable implements SerializableWrapper<Buffer> {

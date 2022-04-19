@@ -1,5 +1,4 @@
-import {Serializable} from './serializable';
-import {Creatable} from './creatable';
+import {Creatable, Serializable} from '.';
 
 /** Serializable implementation that simply wraps another value. */
 export interface SerializableWrapper<ValueT> extends Serializable {

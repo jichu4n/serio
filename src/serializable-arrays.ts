@@ -1,12 +1,12 @@
 import times from 'lodash/times';
-import {Creatable} from './creatable';
 import {
+  Creatable,
   DeserializeOptions,
+  SBuffer,
   Serializable,
+  SerializableWrapper,
   SerializeOptions,
-} from './serializable';
-import {SBuffer} from './serializable-buffers';
-import {SerializableWrapper} from './serializable-wrapper';
+} from '.';
 
 /** A Serializable that represents a concatenation of other Serializables. */
 export class SArray<ValueT extends Serializable = SBuffer>

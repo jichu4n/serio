@@ -1,7 +1,4 @@
-import {
-  createSerializableScalarWrapperClass,
-  SerializableWrapper,
-} from './serializable-wrapper';
+import {createSerializableScalarWrapperClass, SerializableWrapper} from '.';
 
 /** Serializable wrapper for an unsigned 8-bit integer. */
 export class SUInt8
