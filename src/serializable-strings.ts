@@ -21,10 +21,6 @@ export class SStringNT extends SerializableWrapper<string> {
   getSerializedLength(opts?: SerializeOptions): number {
     return encodeString(this.value, opts).length + 1;
   }
-
-  toJSON() {
-    return this.value;
-  }
 }
 
 /** Default text encoding used by this library. */

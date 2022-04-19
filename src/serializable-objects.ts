@@ -7,6 +7,7 @@ import {
   Serializable,
   SerializableWrapper,
   SerializeOptions,
+  toJSON,
 } from '.';
 
 /** Key for storing property information on an SObject's metadata. */
@@ -74,7 +75,7 @@ export class SObject extends Serializable {
     return fromPairs(
       getSerializablePropertySpecs(this).map(({propertyKey}) => [
         propertyKey,
-        (this as any)[propertyKey],
+        toJSON((this as any)[propertyKey]),
       ])
     );
   }

@@ -5,3 +5,4 @@ export * from './serializable-strings';
 export * from './serializable-buffers';
 export * from './serializable-arrays';
 export * from './serializable-objects';
+export * from './utils';

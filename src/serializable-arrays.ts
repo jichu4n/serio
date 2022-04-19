@@ -1,10 +1,14 @@
+import sum from 'lodash/sum';
 import times from 'lodash/times';
 import {
+  deserializeAll,
   DeserializeOptions,
   SBuffer,
   Serializable,
   SerializableWrapper,
+  serializeAll,
   SerializeOptions,
+  toJSON,
 } from '.';
 
 /** A Serializable that represents a concatenation of other Serializables. */
@@ -15,27 +19,19 @@ export class SArray<
   value: Array<ValueT> = [];
 
   deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
-    let readOffset = 0;
-    this.map((element) => {
-      readOffset += element.deserialize(buffer.slice(readOffset), opts);
-    });
-    return readOffset;
+    return deserializeAll(buffer, this.value, opts).serializedLength;
   }
 
   serialize(opts?: SerializeOptions): Buffer {
-    return Buffer.concat(this.map((element) => element.serialize(opts)));
+    return serializeAll(this.value, opts);
   }
 
   getSerializedLength(opts?: SerializeOptions): number {
-    let length = 0;
-    this.map((element) => {
-      length += element.getSerializedLength(opts);
-    });
-    return length;
+    return sum(this.map((element) => element.getSerializedLength(opts)));
   }
 
   toJSON() {
-    return this.value;
+    return this.map(toJSON);
   }
 
   private map<FnT extends (element: ValueT, index: number) => any>(

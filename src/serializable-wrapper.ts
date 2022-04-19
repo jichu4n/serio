@@ -1,15 +1,11 @@
-import {Serializable} from '.';
+import {Serializable, toJSON} from '.';
 
 /** Serializable implementation that simply wraps another value. */
 export abstract class SerializableWrapper<ValueT> extends Serializable {
   abstract value: ValueT;
 
   toJSON() {
-    const value = this.value as any;
-    if ('toJSON' in value && typeof value.toJSON === 'function') {
-      return value.toJSON();
-    }
-    return value;
+    return toJSON(this.value);
   }
 
   static of<ValueT>(

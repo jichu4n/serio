@@ -1,6 +1,6 @@
 import {serialize, serializeAs, SObject, SUInt16BE, SUInt8} from '../';
 
-/** Example object that exercises `serialize` and `serializeWithWrapper`. */
+/** Example object that exercises `serialize` and `serializeAs`. */
 class TestObject extends SObject {
   @serialize
   prop1 = new SUInt8();
@@ -10,7 +10,7 @@ class TestObject extends SObject {
 }
 
 describe('SObject', function () {
-  test('parse and serialize custom object', function () {
+  test('serialize and deserialize custom object', function () {
     const obj1 = new TestObject();
     expect(obj1.getSerializedLength()).toStrictEqual(3);
     obj1.prop1.value = 42;
