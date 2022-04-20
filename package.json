@@ -1,7 +1,7 @@
 {
   "name": "serio",
   "version": "0.0.1",
-  "description": "Smart binary serialization library for TypeScript",
+  "description": "Smart binary serialization in TypeScript",
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",
