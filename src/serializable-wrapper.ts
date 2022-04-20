@@ -17,36 +17,3 @@ export abstract class SerializableWrapper<ValueT> extends Serializable {
     return instance;
   }
 }
-
-/** Factory for Serializable wrappers for basic data types. */
-export function createSerializableScalarWrapperClass<ValueT>({
-  readFn,
-  writeFn,
-  serializedLength,
-  defaultValue,
-}: {
-  readFn: () => ValueT;
-  writeFn: (value: ValueT) => void;
-  serializedLength: number;
-  defaultValue: ValueT;
-}) {
-  const SerializableScalarWrapperClass = class extends SerializableWrapper<ValueT> {
-    value: ValueT = defaultValue;
-
-    deserialize(buffer: Buffer) {
-      this.value = readFn.call(buffer);
-      return serializedLength;
-    }
-
-    serialize() {
-      const buffer = Buffer.alloc(serializedLength);
-      writeFn.call(buffer, this.value);
-      return buffer;
-    }
-
-    getSerializedLength() {
-      return serializedLength;
-    }
-  };
-  return SerializableScalarWrapperClass;
-}
