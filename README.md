@@ -134,7 +134,7 @@ The full list of provided integer types:
 
 ### Strings
 
-Serio provides wrappers for string types. It uses the
+serio provides wrappers for string types. It uses the
 [iconv-lite](https://github.com/ashtuchkin/iconv-lite) library for encoding /
 decoding text in various character sets.
 
@@ -180,7 +180,7 @@ const buf1 = str1.serialize();
 
 ### Objects
 
-Serio provides a base class `SObject` and a set of decorators for defining
+serio provides a base class `SObject` and a set of decorators for defining
 serializable objects (i.e. C/C++ `struct`s).
 
 To define a serializable object:
@@ -191,9 +191,7 @@ To define a serializable object:
    - Use `@serialize` if the property is itself a `Serializable`, such as a
      nested object;
    - Use `@serializeAs(WrapperClass)` if the property should be wrapped with a
-     `Serializable` wrapper, such as integers and strings;
-   - Use `@serializeAccessorAs(WrapperClass)` if the property is computed (i.e.
-     has a getter / setter) and should be wrapped with a `Serializable` wrapper.
+     `Serializable` wrapper, such as an integer or a string.
 
 Example showing wrapping numeric values with `@serializeAs`:
 
@@ -241,8 +239,7 @@ const size = pos1.getSerializedLength();  // => 8
 const bytesRead = pos1.deserialize(buffer.slice(...));  // => 8
 ```
 
-Advanced example showing nesting, `@serialize`, and wrapping getter / setters
-with `@serializeAccessorAs`:
+Advanced example showing nesting, `@serialize`, and wrapping getter / setters:
 
 ```ts
 /** A class that maps to the following C struct:
@@ -267,10 +264,10 @@ class Point {
   green = 0;
   blue = 0;
 
-  // We use @serializeAccessorAs to decorate our getter / setter for `color`,
-  // which encodes red / green / blue components as an 8-bit color value in
-  // the format RRR GGG BB.
-  @serializeAccessorAs(SUInt8)
+  // We use @serializeAs to decorate our getter / setter for `color`, which
+  // encodes red / green / blue components as an 8-bit color value in the
+  // format RRR GGG BB.
+  @serializeAs(SUInt8)
   get color() {
     return (
       ((this.red & 0x07) << 5) | (this.green & (0x07 << 2)) | (this.blue & 0x03)

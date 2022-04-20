@@ -13,9 +13,20 @@ import {
 /** Serializable record where props are defined via serialize and serializeAs. */
 export class SObject extends Serializable {
   deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
-    return this.wrapSArrayError(() =>
-      this.toSArray().deserialize(buffer, opts)
+    const array = this.toSArray();
+    const readOffset = this.wrapSArrayError(() =>
+      array.deserialize(buffer, opts)
     );
+    const serializablePropertySpecs = getSerializablePropertySpecs(this);
+    for (let i = 0; i < serializablePropertySpecs.length; ++i) {
+      const {propertyKey, wrapperType} = serializablePropertySpecs[i];
+      if (wrapperType) {
+        (this as any)[propertyKey] = (
+          array.value[i] as SerializableWrapper<any>
+        ).value;
+      }
+    }
+    return readOffset;
   }
 
   serialize(opts?: SerializeOptions): Buffer {
@@ -28,16 +39,13 @@ export class SObject extends Serializable {
     );
   }
 
-  /** Converts this object to an SArray<Serializable>. */
-  toSArray() {
-    return SArray.of(getAllSerializablePropertiesOrWrappers(this));
-  }
-
   toJSON() {
     return fromPairs(
-      getSerializablePropertySpecs(this).map(({propertyKey}) => [
+      getSerializablePropertySpecs(this).map(({propertyKey, wrapperType}) => [
         propertyKey,
-        toJSON((this as any)[propertyKey]),
+        toJSON(
+          getSerializablePropertyOrWrapper(this, {propertyKey, wrapperType})
+        ),
       ])
     );
   }
@@ -47,6 +55,11 @@ export class SObject extends Serializable {
     const instance = new this();
     Object.assign(instance, props);
     return instance;
+  }
+
+  /** Converts this object to an SArray<Serializable>. */
+  private toSArray() {
+    return SArray.of(getAllSerializablePropertiesOrWrappers(this));
   }
 
   private wrapSArrayError<FnT extends () => any>(fn: FnT): ReturnType<FnT> {
@@ -80,65 +93,10 @@ export function serialize<ValueT>(target: any, propertyKey: string | symbol) {
 
 /** Decorator for properties to be wrapped in a Serializable wrapper class. */
 export function serializeAs<ValueT>(
-  serializableWrapperClass: new () => SerializableWrapper<ValueT>
+  wrapperType: new () => SerializableWrapper<ValueT>
 ): PropertyDecorator {
   return function (target: Object, propertyKey: string | symbol) {
-    const wrapperPropertyKey = Symbol(
-      `__serializablePropertyWrapper_${propertyKey.toString()}`
-    );
-    const getOrCreateWrapper = function (targetInstance: any) {
-      return (
-        targetInstance[wrapperPropertyKey] ??
-        (targetInstance[wrapperPropertyKey] = new serializableWrapperClass())
-      );
-    };
-    Object.defineProperty(target, propertyKey, {
-      get() {
-        return getOrCreateWrapper(this).value;
-      },
-      set(v: ValueT) {
-        getOrCreateWrapper(this).value = v;
-      },
-    });
-    registerSerializableProperty(target, propertyKey, getOrCreateWrapper);
-  };
-}
-
-/** Decorator for accessors to be wrapped in a Serializable wrapper class. */
-export function serializeAccessorAs<ValueT>(
-  serializableWrapperClass: new () => SerializableWrapper<ValueT>
-): MethodDecorator {
-  return function (
-    target: Object,
-    propertyKey: string | symbol,
-    descriptor: PropertyDescriptor
-  ) {
-    const wrapperPropertyKey = Symbol(
-      `__serializablePropertyWrapper_${propertyKey.toString()}`
-    );
-    const getOrCreateWrapper = function (targetInstance: any) {
-      return (
-        targetInstance[wrapperPropertyKey] ??
-        (targetInstance[wrapperPropertyKey] = new serializableWrapperClass())
-      );
-    };
-    registerSerializableProperty(target, propertyKey, getOrCreateWrapper);
-    return {
-      ...descriptor,
-      get() {
-        const v = descriptor.get ? descriptor.get.call(this) : descriptor.value;
-        getOrCreateWrapper(this).value = v;
-        return v;
-      },
-      set(v) {
-        if (descriptor.set) {
-          descriptor.set.call(this, v);
-        } else {
-          descriptor.value = v;
-        }
-        getOrCreateWrapper(this).value = v;
-      },
-    };
+    registerSerializableProperty(target, propertyKey, wrapperType);
   };
 }
 
@@ -151,7 +109,7 @@ const SERIALIZABLE_PROPERTY_SPECS_METADATA_KEY = Symbol(
 function registerSerializableProperty<ValueT>(
   target: any,
   propertyKey: string | symbol,
-  getOrCreateWrapper?: (targetInstance: any) => SerializableWrapper<ValueT>
+  wrapperType?: new () => SerializableWrapper<ValueT>
 ) {
   const serializablePropertySpecs = Reflect.getMetadata(
     SERIALIZABLE_PROPERTY_SPECS_METADATA_KEY,
@@ -159,7 +117,7 @@ function registerSerializableProperty<ValueT>(
   ) as Array<SerializablePropertySpec> | undefined;
   const propertySpec: SerializablePropertySpec = {
     propertyKey,
-    getOrCreateWrapper,
+    wrapperType,
   };
   if (serializablePropertySpecs) {
     serializablePropertySpecs.push(propertySpec);
@@ -176,8 +134,8 @@ function registerSerializableProperty<ValueT>(
 interface SerializablePropertySpec<ValueT = any> {
   /** The name of the property. */
   propertyKey: string | symbol;
-  /** Extract the underlying wrapper for a property (if defined with serializeAs). */
-  getOrCreateWrapper?: (targetInstance: any) => SerializableWrapper<ValueT>;
+  /** The wrapper type for the property, if defined with serializeAs. */
+  wrapperType?: new () => SerializableWrapper<ValueT>;
 }
 
 /** Extract SerializablePropertySpec's defined on a SObject. */
@@ -191,11 +149,16 @@ function getSerializablePropertySpecs(targetInstance: Object) {
 /** Get the Serializable value corresponding to an SObject property. */
 function getSerializablePropertyOrWrapper(
   targetInstance: Object,
-  {propertyKey, getOrCreateWrapper}: SerializablePropertySpec
+  {propertyKey, wrapperType}: SerializablePropertySpec
 ) {
-  return getOrCreateWrapper
-    ? getOrCreateWrapper(targetInstance)
-    : ((targetInstance as any)[propertyKey] as Serializable);
+  const value = (targetInstance as any)[propertyKey];
+  if (wrapperType) {
+    const wrapper = new wrapperType();
+    wrapper.value = value;
+    return wrapper;
+  } else {
+    return value as Serializable;
+  }
 }
 
 /** Get Serializable values corresponding to all the properties of an SObject. */

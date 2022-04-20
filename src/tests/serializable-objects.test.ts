@@ -1,6 +1,5 @@
 import {
   serialize,
-  serializeAccessorAs,
   serializeAs,
   SObject,
   SStringNT,
@@ -32,22 +31,20 @@ class TestObjectB extends SObject {
   get fullName(): SStringNT {
     return SStringNT.of(`${this.firstName} ${this.lastName}`);
   }
-
   set fullName(fullName: SStringNT) {
     [this.firstName, this.lastName] = fullName.value.split(' ');
   }
 }
 
-/** Example object that tests serializeAccessorAs. */
+/** Example object that tests serializeAs with accessors. */
 class TestObjectC extends SObject {
   firstName: string = '';
   lastName: string = '';
 
-  @serializeAccessorAs(SStringNT)
+  @serializeAs(SStringNT)
   get fullName() {
     return `${this.firstName} ${this.lastName}`;
   }
-
   set fullName(fullName: string) {
     [this.firstName, this.lastName] = fullName.split(' ');
   }
