@@ -10,44 +10,6 @@ import {
   toJSON,
 } from '.';
 
-/** Key for storing property information on an SObject's metadata. */
-export const SERIALIZABLE_PROPERTY_SPECS_METADATA_KEY = Symbol(
-  '__serializableObjectPropertySpecs'
-);
-
-/** Metadata stored for each serializable property on an SObject's metadata. */
-export interface SerializablePropertySpec<ValueT = any> {
-  /** The name of the property. */
-  propertyKey: string | symbol;
-  /** Extract the underlying wrapper for a property (if defined with serializeAs). */
-  getOrCreateWrapper?: (targetInstance: any) => SerializableWrapper<ValueT>;
-}
-
-/** Extract SerializablePropertySpec's defined on a SObject. */
-export function getSerializablePropertySpecs(targetInstance: Object) {
-  return (Reflect.getMetadata(
-    SERIALIZABLE_PROPERTY_SPECS_METADATA_KEY,
-    Object.getPrototypeOf(targetInstance)
-  ) ?? []) as Array<SerializablePropertySpec>;
-}
-
-/** Get the Serializable value corresponding to an SObject property. */
-export function getSerializablePropertyOrWrapper(
-  targetInstance: Object,
-  {propertyKey, getOrCreateWrapper}: SerializablePropertySpec
-) {
-  return getOrCreateWrapper
-    ? getOrCreateWrapper(targetInstance)
-    : ((targetInstance as any)[propertyKey] as Serializable);
-}
-
-/** Get Serializable values corresponding to all the properties of an SObject. */
-export function getAllSerializablePropertiesOrWrappers(targetInstance: Object) {
-  return getSerializablePropertySpecs(targetInstance).map((propertySpec) =>
-    getSerializablePropertyOrWrapper(targetInstance, propertySpec)
-  );
-}
-
 /** Serializable record where props are defined via serialize and serializeAs. */
 export class SObject extends Serializable {
   deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
@@ -111,33 +73,12 @@ export interface SObjectError extends SArrayError {
   propertyKey: string | symbol;
 }
 
-/** Decorator for Serializable properties. */
-export function serialize<ValueT>(
-  target: any,
-  propertyKey: string | symbol,
-  // Used by serializeWithWrapper
-  getOrCreateWrapper?: (targetInstance: any) => SerializableWrapper<ValueT>
-) {
-  const serializablePropertySpecs = Reflect.getMetadata(
-    SERIALIZABLE_PROPERTY_SPECS_METADATA_KEY,
-    target
-  ) as Array<SerializablePropertySpec> | undefined;
-  const propertySpec: SerializablePropertySpec = {
-    propertyKey,
-    getOrCreateWrapper,
-  };
-  if (serializablePropertySpecs) {
-    serializablePropertySpecs.push(propertySpec);
-  } else {
-    Reflect.defineMetadata(
-      SERIALIZABLE_PROPERTY_SPECS_METADATA_KEY,
-      [propertySpec],
-      target
-    );
-  }
+/** Decorator for Serializable properties of an SObject. */
+export function serialize<ValueT>(target: any, propertyKey: string | symbol) {
+  registerSerializableProperty(target, propertyKey);
 }
 
-/** Decorator for Serializable properties to be wrapped in a wrapper class. */
+/** Decorator for properties to be wrapped in a Serializable wrapper class. */
 export function serializeAs<ValueT>(
   serializableWrapperClass: new () => SerializableWrapper<ValueT>
 ): PropertyDecorator {
@@ -159,6 +100,107 @@ export function serializeAs<ValueT>(
         getOrCreateWrapper(this).value = v;
       },
     });
-    serialize(target, propertyKey, getOrCreateWrapper);
+    registerSerializableProperty(target, propertyKey, getOrCreateWrapper);
   };
+}
+
+/** Decorator for accessors to be wrapped in a Serializable wrapper class. */
+export function serializeAccessorAs<ValueT>(
+  serializableWrapperClass: new () => SerializableWrapper<ValueT>
+): MethodDecorator {
+  return function (
+    target: Object,
+    propertyKey: string | symbol,
+    descriptor: PropertyDescriptor
+  ) {
+    const wrapperPropertyKey = Symbol(
+      `__serializablePropertyWrapper_${propertyKey.toString()}`
+    );
+    const getOrCreateWrapper = function (targetInstance: any) {
+      return (
+        targetInstance[wrapperPropertyKey] ??
+        (targetInstance[wrapperPropertyKey] = new serializableWrapperClass())
+      );
+    };
+    registerSerializableProperty(target, propertyKey, getOrCreateWrapper);
+    return {
+      ...descriptor,
+      get() {
+        const v = descriptor.get ? descriptor.get.call(this) : descriptor.value;
+        getOrCreateWrapper(this).value = v;
+        return v;
+      },
+      set(v) {
+        if (descriptor.set) {
+          descriptor.set.call(this, v);
+        } else {
+          descriptor.value = v;
+        }
+        getOrCreateWrapper(this).value = v;
+      },
+    };
+  };
+}
+
+/** Key for storing property information on an SObject's metadata. */
+const SERIALIZABLE_PROPERTY_SPECS_METADATA_KEY = Symbol(
+  '__serializableObjectPropertySpecs'
+);
+
+/** Registers a serializable property in the metadata of an SObject. */
+function registerSerializableProperty<ValueT>(
+  target: any,
+  propertyKey: string | symbol,
+  getOrCreateWrapper?: (targetInstance: any) => SerializableWrapper<ValueT>
+) {
+  const serializablePropertySpecs = Reflect.getMetadata(
+    SERIALIZABLE_PROPERTY_SPECS_METADATA_KEY,
+    target
+  ) as Array<SerializablePropertySpec> | undefined;
+  const propertySpec: SerializablePropertySpec = {
+    propertyKey,
+    getOrCreateWrapper,
+  };
+  if (serializablePropertySpecs) {
+    serializablePropertySpecs.push(propertySpec);
+  } else {
+    Reflect.defineMetadata(
+      SERIALIZABLE_PROPERTY_SPECS_METADATA_KEY,
+      [propertySpec],
+      target
+    );
+  }
+}
+
+/** Metadata stored for each serializable property on an SObject's metadata. */
+interface SerializablePropertySpec<ValueT = any> {
+  /** The name of the property. */
+  propertyKey: string | symbol;
+  /** Extract the underlying wrapper for a property (if defined with serializeAs). */
+  getOrCreateWrapper?: (targetInstance: any) => SerializableWrapper<ValueT>;
+}
+
+/** Extract SerializablePropertySpec's defined on a SObject. */
+function getSerializablePropertySpecs(targetInstance: Object) {
+  return (Reflect.getMetadata(
+    SERIALIZABLE_PROPERTY_SPECS_METADATA_KEY,
+    Object.getPrototypeOf(targetInstance)
+  ) ?? []) as Array<SerializablePropertySpec>;
+}
+
+/** Get the Serializable value corresponding to an SObject property. */
+function getSerializablePropertyOrWrapper(
+  targetInstance: Object,
+  {propertyKey, getOrCreateWrapper}: SerializablePropertySpec
+) {
+  return getOrCreateWrapper
+    ? getOrCreateWrapper(targetInstance)
+    : ((targetInstance as any)[propertyKey] as Serializable);
+}
+
+/** Get Serializable values corresponding to all the properties of an SObject. */
+function getAllSerializablePropertiesOrWrappers(targetInstance: Object) {
+  return getSerializablePropertySpecs(targetInstance).map((propertySpec) =>
+    getSerializablePropertyOrWrapper(targetInstance, propertySpec)
+  );
 }
