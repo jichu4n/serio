@@ -1,0 +1,66 @@
+import {SStringNT} from '..';
+import iconv from 'iconv-lite';
+
+describe('SStringNT', function () {
+  test('serialize and deserialize without fixed size', function () {
+    const str1 = new SStringNT();
+    expect(str1.getSerializedLength()).toStrictEqual(1);
+    expect(str1.serialize().toString('utf-8')).toStrictEqual('\x00');
+
+    str1.value = 'hello';
+    expect(str1.getSerializedLength()).toStrictEqual(6);
+    expect(str1.serialize().toString('utf-8')).toStrictEqual('hello\x00');
+
+    const str2 = SStringNT.from(str1.serialize());
+    expect(str2.value).toStrictEqual('hello');
+    expect(str2.getSerializedLength()).toStrictEqual(6);
+    expect(str2.serialize().toString('utf-8')).toStrictEqual('hello\x00');
+  });
+
+  test('serialize and deserialize with fixed size', function () {
+    const str1 = new (SStringNT.ofLength(5))();
+    expect(str1.getSerializedLength()).toStrictEqual(5);
+    expect(str1.serialize().toString('utf-8')).toStrictEqual(
+      '\x00\x00\x00\x00\x00'
+    );
+
+    str1.value = 'cat';
+    expect(str1.getSerializedLength()).toStrictEqual(5);
+    expect(str1.serialize().length).toStrictEqual(5);
+    expect(str1.serialize().toString('utf-8')).toStrictEqual('cat\x00\x00');
+
+    const str2 = SStringNT.ofLength(5).from(str1.serialize());
+    expect(str2.value).toStrictEqual('cat');
+    expect(str2.getSerializedLength()).toStrictEqual(5);
+    expect(str2.serialize().toString('utf-8')).toStrictEqual('cat\x00\x00');
+
+    const str3 = SStringNT.ofLength(5).of('hello world');
+    expect(str3.value).toStrictEqual('hello world');
+    expect(str3.getSerializedLength()).toStrictEqual(5);
+    expect(str3.serialize().toString('utf-8')).toStrictEqual('hell\x00');
+
+    const str4 = SStringNT.ofLength(5).from(str3.serialize());
+    expect(str4.value).toStrictEqual('hell');
+  });
+
+  test('serialize and deserialize with different encodings', function () {
+    const str1 = SStringNT.of('你好');
+    // UTF-8 uses 3 bytes per character.
+    expect(str1.getSerializedLength()).toStrictEqual(7);
+    expect(str1.serialize().toString('utf-8')).toStrictEqual('你好\x00');
+    // GB2312 uses two bytes per character.
+    expect(str1.getSerializedLength({encoding: 'gb2312'})).toStrictEqual(5);
+    expect(
+      iconv.decode(str1.serialize({encoding: 'gb2312'}), 'gb2312')
+    ).toStrictEqual('你好\x00');
+
+    // Test truncation with fixed length.
+    const str2 = SStringNT.ofLength(7).of('你好啊，世界');
+    expect(str2.getSerializedLength()).toStrictEqual(7);
+    expect(str2.serialize().toString('utf-8')).toStrictEqual('你好\x00');
+    expect(str2.getSerializedLength({encoding: 'gb2312'})).toStrictEqual(7);
+    expect(
+      iconv.decode(str2.serialize({encoding: 'gb2312'}), 'gb2312')
+    ).toStrictEqual('你好啊\x00');
+  });
+});

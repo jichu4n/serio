@@ -138,6 +138,8 @@ serio provides wrappers for string types. It uses the
 [iconv-lite](https://github.com/ashtuchkin/iconv-lite) library for encoding /
 decoding text in various character sets.
 
+#### Variable-length strings
+
 Example usage:
 
 ```ts
@@ -148,7 +150,7 @@ const str2 = SStringNT.of('hello world!');
 // ...by decoding from a buffer using the default encoding (UTF-8):
 const str3 = SStringNT.from(buffer.slice(...));
 // ...by decoding from a buffer using a different encoding:
-const str3 = SStringNT.from(buffer.slice(...), { encoding: 'gb2312' });
+const str4 = SStringNT.from(buffer.slice(...), { encoding: 'gb2312' });
 
 // Manipulate the wrapped value:
 str1.value = 'foo bar';
@@ -176,6 +178,45 @@ const buf1 = str1.serialize();
 setDefaultEncoding('cp437');
 // ...will now use CP437 if no encoding specified:
 const buf1 = str1.serialize();
+```
+
+#### Fixed sized strings
+
+Fixed size strings are equivalent to C character arrays (`char[N]`) and will
+zero pad or truncate data to a fixed size during serialization and
+deserialization.
+
+Example usage:
+
+```ts
+// Create a fixed size null-terminated string:
+const str1 = new (SStringNT().ofLength(5))();
+// ...with an initial value:
+const str2 = SStringNT.ofLength(5).of('hello world!');
+// ...by decoding from a buffer using the default encoding (UTF-8):
+const str3 = SStringNT.ofLength(5).from(buffer.slice(...));
+
+// Manipulate the wrapped value:
+str1.value = 'foo bar';
+
+// Fixed size strings will zero-pad up to its specified size for serialization
+// / deserialization:
+const str1 = new (SStringNT.ofLength(3))();
+console.log(str1.value); // =>  ''
+const buf1 = str1.serialize(); // => '\x00\x00\x00'
+const size1 = str1.getSerializedLength(); // => 3
+str1.value = 'A';
+const buf2 = str1.serialize(); // => 'A\x00\x00'
+const size2 = str1.getSerializedLength(); // => 3
+
+// Fixed size strings will truncate values down to its specified size for
+// serialization / deserialization:
+const str2 = SStringNT.ofLength(3).of('hello');
+console.log(str2.value); // => 'hello'
+const buf1 = str2.serialize(); // => 'he\x00'
+const size2 = str2.getSerializedLength(); // => 3
+str2.deserialize(Buffer.from('hello', 'utf-8'));
+console.log(str2.value); // => 'hel'
 ```
 
 ### Objects
@@ -247,6 +288,7 @@ Advanced example showing nesting, `@serialize`, and wrapping getter / setters:
  *      struct Point {
  *          Position position;
  *          uint8_t color;
+ *          char[31] label;
  *      };
  *
  *  ...where `color` is an 8-bit color in the format RRR GG BB (see
@@ -278,6 +320,9 @@ class Point {
     this.green = (v >> 2) & 0x07;
     this.blue = v & 0x03;
   }
+
+  @serializeAs(SStringNT.ofLength(31))
+  label = '';
 }
 ```
 

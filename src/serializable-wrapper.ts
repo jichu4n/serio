@@ -9,8 +9,8 @@ export abstract class SerializableWrapper<ValueT> extends Serializable {
   }
 
   /** Create a new instance of this wrapper class from a raw value. */
-  static of<ValueT>(
-    this: new () => SerializableWrapper<ValueT>,
+  static of<ValueT, WrapperT extends SerializableWrapper<ValueT>>(
+    this: new () => WrapperT,
     value: ValueT
   ) {
     const instance = new this();

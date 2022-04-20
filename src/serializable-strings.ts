@@ -1,25 +1,58 @@
 import iconv from 'iconv-lite';
 import {SmartBuffer} from 'smart-buffer';
-import {DeserializeOptions, SerializableWrapper, SerializeOptions} from '.';
+import {
+  DeserializeOptions,
+  Serializable,
+  SerializableWrapper,
+  SerializeOptions,
+} from '.';
 
 /** Serializable wrapper class for null-terminated strings. */
 export class SStringNT extends SerializableWrapper<string> {
   value: string = '';
+  /** Fixed serialized size, or undefined if dynamically sized. */
+  length?: number;
 
   deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
-    const reader = SmartBuffer.fromBuffer(buffer);
-    this.value = decodeString(reader.readBufferNT(), opts);
-    return reader.readOffset;
+    let reader: SmartBuffer;
+    let readOffset: number;
+    if (this.length) {
+      reader = SmartBuffer.fromBuffer(buffer.slice(0, this.length));
+      this.value = decodeString(reader.readBufferNT(), opts);
+      readOffset = reader.length;
+    } else {
+      reader = SmartBuffer.fromBuffer(buffer);
+      this.value = decodeString(reader.readBufferNT(), opts);
+      readOffset = reader.readOffset;
+    }
+    return readOffset;
   }
 
   serialize(opts?: SerializeOptions): Buffer {
-    const writer = new SmartBuffer();
-    writer.writeBufferNT(encodeString(this.value, opts));
+    const encodedValue = encodeString(this.value, opts);
+    let writer: SmartBuffer;
+    if (this.length) {
+      writer = SmartBuffer.fromBuffer(Buffer.alloc(this.length));
+      writer.writeBufferNT(encodedValue.slice(0, this.length - 1));
+    } else {
+      writer = new SmartBuffer();
+      writer.writeBufferNT(encodedValue);
+    }
     return writer.toBuffer();
   }
 
   getSerializedLength(opts?: SerializeOptions): number {
-    return encodeString(this.value, opts).length + 1;
+    return this.length || encodeString(this.value, opts).length + 1;
+  }
+
+  /** Returns a SStringNT class that has a fixed serialized size. */
+  static ofLength(length: number) {
+    if (length < 0 || (length | 0) !== length) {
+      throw new Error(`Invalid length ${length}`);
+    }
+    return class extends SStringNT {
+      length = length;
+    };
   }
 }
 

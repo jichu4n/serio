@@ -16,8 +16,8 @@ class TestObjectA extends SObject {
   @serializeAs(SUInt16BE)
   prop2 = 0;
 
-  @serializeAs(SUInt32LE)
-  prop3 = 1000;
+  @serializeAs(SStringNT.ofLength(4))
+  prop3 = '';
 }
 
 const TEST_OBJECT_A_SERIALIZED_LENGTH = 7;
@@ -59,7 +59,7 @@ describe('SObject', function () {
       );
       obj1.prop1.value = 42;
       obj1.prop2 = 153;
-      obj1.prop3 = 99;
+      obj1.prop3 = 'FOO!';
       const serializedObj1 = obj1.serialize();
       expect(serializedObj1).toHaveLength(obj1.getSerializedLength());
 
@@ -165,12 +165,12 @@ describe('SObject', function () {
     const obj1 = TestObjectA.with({
       prop1: SUInt8.of(100),
       prop2: 50,
-      prop3: 30,
+      prop3: 'FOO!',
     });
     expect(obj1.toJSON()).toStrictEqual({
       prop1: 100,
       prop2: 50,
-      prop3: 30,
+      prop3: 'FOO!',
     });
 
     const obj2 = TestObjectB.with({firstName: 'Jane', lastName: 'Doe'});
