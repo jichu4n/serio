@@ -1,7 +1,7 @@
 import {SBuffer, SDynamicBuffer, SUInt16BE} from '../';
 
 describe('SBuffer', function () {
-  test('serialize and deserialize buffer', function () {
+  test('serialize and deserialize', function () {
     const text = 'hello, world';
     const buf1 = SBuffer.of(Buffer.from(text, 'utf-8'));
     expect(buf1.getSerializedLength()).toStrictEqual(text.length);
@@ -17,7 +17,7 @@ class SDynamicBufferWithSUInt16BE extends SDynamicBuffer<SUInt16BE> {
 }
 
 describe('SDynamicBuffer', function () {
-  test('serialize and deserialize dynamic buffer', function () {
+  test('serialize and deserialize', function () {
     const buf1 = SDynamicBufferWithSUInt16BE.of(Buffer.alloc(10));
     expect(buf1.getSerializedLength()).toStrictEqual(12);
     const serializedBuf1 = buf1.serialize();

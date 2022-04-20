@@ -32,7 +32,7 @@ export function deserializeAll(
 
 /** Returns the JSON representation of a value by invoking toJSON() if it exists. */
 export function toJSON(value: any) {
-  if ('toJSON' in value && typeof value.toJSON === 'function') {
+  if (typeof value['toJSON'] === 'function') {
     return value.toJSON();
   }
   return value;

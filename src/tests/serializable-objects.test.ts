@@ -1,7 +1,7 @@
 import {
   serialize,
-  serializeAs,
   serializeAccessorAs,
+  serializeAs,
   SObject,
   SStringNT,
   SUInt16BE,
@@ -162,5 +162,24 @@ describe('SObject', function () {
         Buffer.from(obj3.serialize().slice(0, obj3.fullName.length)).toString()
       ).toStrictEqual('Jane Doe');
     });
+  });
+
+  describe('toJSON', function () {
+    const obj1 = TestObjectA.with({
+      prop1: SUInt8.of(100),
+      prop2: 50,
+      prop3: 30,
+    });
+    expect(obj1.toJSON()).toStrictEqual({
+      prop1: 100,
+      prop2: 50,
+      prop3: 30,
+    });
+
+    const obj2 = TestObjectB.with({firstName: 'Jane', lastName: 'Doe'});
+    expect(obj2.toJSON()).toStrictEqual({fullName: 'Jane Doe'});
+
+    const obj3 = TestObjectB.with({firstName: 'Jane', lastName: 'Doe'});
+    expect(obj3.toJSON()).toStrictEqual({fullName: 'Jane Doe'});
   });
 });

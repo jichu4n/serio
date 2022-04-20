@@ -3,7 +3,6 @@ import times from 'lodash/times';
 import {
   deserializeAll,
   DeserializeOptions,
-  SBuffer,
   Serializable,
   SerializableWrapper,
   serializeAll,
@@ -13,7 +12,7 @@ import {
 
 /** A Serializable that represents a concatenation of other Serializables. */
 export class SArray<
-  ValueT extends Serializable = SBuffer
+  ValueT extends Serializable = Serializable
 > extends SerializableWrapper<Array<ValueT>> {
   /** Array of Serializables. */
   value: Array<ValueT> = [];
@@ -56,7 +55,7 @@ export class SArray<
 /** An array encoded as a number N followed by N elements. */
 export abstract class SDynamicArray<
   LengthT extends SerializableWrapper<number>,
-  ValueT extends Serializable = SBuffer
+  ValueT extends Serializable = Serializable
 > extends SArray<ValueT> {
   /** Length type, to be provided by child classes. */
   protected abstract lengthType: new () => LengthT;
@@ -85,7 +84,7 @@ export abstract class SDynamicArray<
 }
 
 /** Error augmented by SArray with index information. */
-export interface SArrayError<ValueT extends Serializable = SBuffer>
+export interface SArrayError<ValueT extends Serializable = Serializable>
   extends Error {
   /** Indicates this is an SArrayError. */
   isSArrayError: true;

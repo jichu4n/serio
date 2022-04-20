@@ -8,6 +8,7 @@ export abstract class SerializableWrapper<ValueT> extends Serializable {
     return toJSON(this.value);
   }
 
+  /** Create a new instance of this wrapper class from a raw value. */
   static of<ValueT>(
     this: new () => SerializableWrapper<ValueT>,
     value: ValueT
