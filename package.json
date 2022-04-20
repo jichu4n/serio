@@ -3,11 +3,13 @@
   "version": "0.0.1",
   "description": "Smart binary serialization in TypeScript",
   "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "build:docs": "rm -rf ./docs/ && typedoc",
     "lint": "prettier --check .",
-    "test": "jest"
+    "test": "jest",
+    "prepare": "npm run lint && npm run build && npm test"
   },
   "repository": {
     "type": "git",
@@ -15,6 +17,20 @@
   },
   "author": "Chuan Ji <chuan@jichu4n.com>",
   "license": "Apache-2.0",
+  "keywords": [
+    "c",
+    "binary",
+    "buffer",
+    "decode",
+    "deserialize",
+    "encode",
+    "endianness",
+    "pack",
+    "parse",
+    "serialize",
+    "struct",
+    "unpack"
+  ],
   "devDependencies": {
     "@types/jest": "^27.4.1",
     "@types/lodash": "^4.14.182",
