@@ -202,7 +202,6 @@ describe('SObject', function () {
       obj1.serialize();
     } catch (e) {
       const e2 = e as SObjectError;
-      expect(e2.isSObjectError).toStrictEqual(true);
       expect(e2.propertyKey).toStrictEqual('prop2');
       // @ts-ignore
       expect(e2.cause.message).toBe('test error');
@@ -213,7 +212,6 @@ describe('SObject', function () {
       obj1.deserialize(Buffer.alloc(100));
     } catch (e) {
       const e2 = e as SObjectError;
-      expect(e2.isSObjectError).toStrictEqual(true);
       expect(e2.propertyKey).toStrictEqual('prop2');
       // @ts-ignore
       expect(e2.cause.message).toBe('test error');
@@ -224,7 +222,6 @@ describe('SObject', function () {
       obj1.toJSON();
     } catch (e) {
       const e2 = e as SObjectError;
-      expect(e2.isSObjectError).toStrictEqual(true);
       expect(e2.propertyKey).toStrictEqual('prop2');
       // @ts-ignore
       expect(e2.cause.message).toBe('test error');

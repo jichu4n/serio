@@ -7,7 +7,6 @@ import {
   Serializable,
   SerializableWrapper,
   SerializeOptions,
-  toJSON,
 } from '.';
 
 /** Serializable record where props are defined via serialize and serializeAs. */
@@ -80,7 +79,7 @@ export class SObject extends Serializable {
           `Error in property ${propertyKey}: ${cause.message}`,
           {cause}
         );
-        e2.isSObjectError = true;
+        e2.stack = e.stack;
         e2.propertyKey = propertyKey;
         throw e2;
       } else {
@@ -97,8 +96,6 @@ export class SObjectError extends Error {
     super(message, {cause});
     Object.setPrototypeOf(this, SObjectError.prototype);
   }
-  /** Indicates this is an SObjectError. */
-  isSObjectError: true = true;
   /** The property that raised the error. */
   propertyKey!: string;
 }

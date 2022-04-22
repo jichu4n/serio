@@ -5,8 +5,9 @@ import {
   Serializable,
   SerializableWrapper,
   SerializeOptions,
-  toJSON,
+  WrappedValueT,
 } from '.';
+import {toJSON} from './utils';
 
 /** A Serializable that represents a concatenation of other Serializables. */
 export class SArray<
@@ -35,6 +36,30 @@ export class SArray<
     return this.map(toJSON);
   }
 
+  /** Create an SArray instance with a given length, filled with the provided
+   * generator function.
+   *
+   * @param elementGenerator A function that returns an element value.
+   */
+  static ofLength<ValueT extends Serializable = Serializable>(
+    length: number,
+    elementGenerator: () => ValueT
+  ): SArray<ValueT> {
+    return SArray.of<Array<ValueT>, SArray<ValueT>>(
+      times(length, elementGenerator)
+    );
+  }
+
+  /** Returns an SArrayWithWrapper class that wraps elements with the provided
+   * SerializableWrapper. */
+  static withWrapper<WrapperT extends SerializableWrapper<any>>(
+    wrapperType: new () => WrapperT
+  ) {
+    return class extends SArrayWithWrapper<WrappedValueT<WrapperT>, WrapperT> {
+      wrapperType = wrapperType;
+    };
+  }
+
   private map<FnT extends (element: ValueT, index: number) => any>(
     fn: FnT
   ): Array<ReturnType<FnT>> {
@@ -47,6 +72,7 @@ export class SArray<
             `Error at element ${index}: ${e.message}`,
             {cause: e}
           );
+          e2.stack = e.stack;
           e2.element = element;
           e2.index = index;
           throw e2;
@@ -55,6 +81,77 @@ export class SArray<
         }
       }
     });
+  }
+}
+
+/** SArray variant that wraps each element for serialization / deserialization.
+ */
+export abstract class SArrayWithWrapper<
+  ValueT,
+  WrapperT extends SerializableWrapper<ValueT>
+> extends SerializableWrapper<Array<ValueT>> {
+  /** Array of unwrapped values. */
+  value: Array<ValueT> = [];
+  /** Wrapper type constructor. */
+  abstract wrapperType: new () => WrapperT;
+
+  deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
+    const array = this.toSArray();
+    const readOffset = array.deserialize(buffer, opts);
+    this.value.splice(
+      0,
+      this.value.length,
+      ...array.value.map(({value}) => value)
+    );
+    return readOffset;
+  }
+
+  serialize(opts?: SerializeOptions): Buffer {
+    return this.toSArray().serialize(opts);
+  }
+
+  getSerializedLength(opts?: SerializeOptions): number {
+    return this.toSArray().getSerializedLength(opts);
+  }
+
+  toJSON() {
+    return this.toSArray().toJSON();
+  }
+
+  /** Create an SArrayWithWrapper instance with a given length, filled with the provided
+   * element value or generator function.
+   *
+   * @param elementValueOrGenerator An element value or a function that returns an
+   *     element value.
+   */
+  static ofLength<WrapperT extends SerializableWrapper<any>>(
+    this: new () => SArrayWithWrapper<WrappedValueT<WrapperT>, WrapperT>,
+    length: number,
+    elementValueOrGenerator:
+      | WrappedValueT<WrapperT>
+      | (() => WrappedValueT<WrapperT>)
+  ): SArrayWithWrapper<WrappedValueT<WrapperT>, WrapperT> {
+    const elementGenerator =
+      typeof elementValueOrGenerator === 'function'
+        ? elementValueOrGenerator
+        : () => elementValueOrGenerator;
+    const instance = new this();
+    instance.value = times(length, elementGenerator);
+    return instance;
+  }
+
+  /** Constructs an SArray of wrappers around the current array of elements. */
+  toSArray() {
+    if (!this.value.map) {
+      console.error('this.value.map is not a function: ' + this.value);
+    }
+    return SArray.of(
+      this.value.map((element) => {
+        const wrapper = new this.wrapperType();
+        wrapper.value = element;
+        return wrapper;
+      })
+    );
   }
 }
 

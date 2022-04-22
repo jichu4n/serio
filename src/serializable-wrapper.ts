@@ -1,4 +1,5 @@
-import {Serializable, toJSON} from '.';
+import {Serializable} from '.';
+import {toJSON} from './utils';
 
 /** Serializable implementation that simply wraps another value. */
 export abstract class SerializableWrapper<ValueT> extends Serializable {
@@ -18,3 +19,9 @@ export abstract class SerializableWrapper<ValueT> extends Serializable {
     return instance;
   }
 }
+
+export type WrappedValueT<WrapperT> = WrapperT extends SerializableWrapper<
+  infer ValueT
+>
+  ? ValueT
+  : never;

@@ -2,6 +2,19 @@ import {SArray, SArrayError, SInt16LE, SInt8, SStringNT, SUInt16BE} from '../';
 import {ThrowingSerializable} from './throwing-serializable';
 
 describe('SArray', function () {
+  test('create', function () {
+    const arr1 = SArray.ofLength(3, () => SUInt16BE.of(42));
+    expect(arr1.value.map(({value}) => value)).toStrictEqual([42, 42, 42]);
+
+    const arr2 = SArray.ofLength(3, function () {
+      return SUInt16BE.of(42);
+    });
+    expect(arr2.value.map(({value}) => value)).toStrictEqual([42, 42, 42]);
+
+    const arr3 = SArray.ofLength(3, () => SUInt16BE.of(42));
+    expect(arr3.value.map(({value}) => value)).toStrictEqual([42, 42, 42]);
+  });
+
   test('serialize and deserialize', function () {
     const arr1 = new SArray();
     expect(arr1.getSerializedLength()).toStrictEqual(0);
@@ -68,5 +81,51 @@ describe('SArray', function () {
       // @ts-ignore
       expect(e2.cause.message).toBe('test error');
     }
+  });
+});
+
+describe('SArrayWithWrapper', function () {
+  test('create', function () {
+    const arr1 = SArray.withWrapper(SUInt16BE).ofLength(3, 42);
+    expect(arr1.value).toStrictEqual([42, 42, 42]);
+
+    const arr2 = SArray.withWrapper(SUInt16BE).ofLength(3, function () {
+      return 42;
+    });
+    expect(arr2.value).toStrictEqual([42, 42, 42]);
+
+    const arr3 = SArray.withWrapper(SUInt16BE).ofLength(3, () => 42);
+    expect(arr3.value).toStrictEqual([42, 42, 42]);
+  });
+
+  test('serialize and deserialize', function () {
+    const arr1 = SArray.withWrapper(SUInt16BE).of([100, 200, 300]);
+    expect(arr1.getSerializedLength()).toStrictEqual(6);
+
+    const arr2 = SArray.ofLength(3, () => SUInt16BE.of(0));
+    arr2.deserialize(arr1.serialize());
+    expect(arr2.value.map(({value}) => value)).toStrictEqual([100, 200, 300]);
+
+    const arr3 = SArray.withWrapper(SUInt16BE).ofLength(3, 0);
+    arr3.deserialize(arr1.serialize());
+    expect(arr3.value).toStrictEqual([100, 200, 300]);
+
+    const arr4 = SArray.withWrapper(SArray.withWrapper(SUInt16BE)).of([
+      [1, 2, 3],
+      [4, 5, 6],
+      [7, 8, 9],
+    ]);
+    expect(arr4.getSerializedLength()).toStrictEqual(18);
+    const arr5 = SArray.withWrapper(SUInt16BE).ofLength(9, 0);
+    arr5.deserialize(arr4.serialize());
+    expect(arr5.value).toStrictEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  });
+
+  test('toJSON', function () {
+    const arr1 = SArray.withWrapper(SUInt16BE).of([100, 200, 300]);
+    expect(arr1.toJSON()).toStrictEqual([100, 200, 300]);
+
+    const arr2 = SArray.withWrapper(SStringNT).of(['hello', 'world']);
+    expect(arr2.toJSON()).toStrictEqual(['hello', 'world']);
   });
 });
