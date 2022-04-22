@@ -1,4 +1,5 @@
-import {SArray, SInt16LE, SInt8, SStringNT} from '../';
+import {SArray, SArrayError, SInt16LE, SInt8, SStringNT, SUInt16BE} from '../';
+import {ThrowingSerializable} from './throwing-serializable';
 
 describe('SArray', function () {
   test('serialize and deserialize', function () {
@@ -23,5 +24,49 @@ describe('SArray', function () {
       SArray.of([SInt16LE.of(100), SInt16LE.of(200)]),
     ]);
     expect(arr1.toJSON()).toStrictEqual(['hello', 42, [100, 200]]);
+  });
+
+  test('error handling', function () {
+    const arr1 = SArray.of([
+      SUInt16BE.of(3),
+      new ThrowingSerializable('test error'),
+      SUInt16BE.of(100),
+    ]);
+
+    expect(() => arr1.serialize()).toThrow(SArrayError);
+    try {
+      arr1.serialize();
+    } catch (e) {
+      const e2 = e as SArrayError;
+      expect(e2.isSArrayError).toStrictEqual(true);
+      expect(e2.element).toStrictEqual(arr1.value[1]);
+      expect(e2.index).toStrictEqual(1);
+      // @ts-ignore
+      expect(e2.cause.message).toBe('test error');
+    }
+
+    expect(() => arr1.deserialize(Buffer.alloc(100))).toThrow(SArrayError);
+    try {
+      arr1.deserialize(Buffer.alloc(100));
+    } catch (e) {
+      const e2 = e as SArrayError;
+      expect(e2.isSArrayError).toStrictEqual(true);
+      expect(e2.element).toStrictEqual(arr1.value[1]);
+      expect(e2.index).toStrictEqual(1);
+      // @ts-ignore
+      expect(e2.cause.message).toBe('test error');
+    }
+
+    expect(() => arr1.toJSON()).toThrow(SArrayError);
+    try {
+      arr1.toJSON();
+    } catch (e) {
+      const e2 = e as SArrayError;
+      expect(e2.isSArrayError).toStrictEqual(true);
+      expect(e2.element).toStrictEqual(arr1.value[1]);
+      expect(e2.index).toStrictEqual(1);
+      // @ts-ignore
+      expect(e2.cause.message).toBe('test error');
+    }
   });
 });

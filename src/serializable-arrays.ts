@@ -1,11 +1,9 @@
 import sum from 'lodash/sum';
 import times from 'lodash/times';
 import {
-  deserializeAll,
   DeserializeOptions,
   Serializable,
   SerializableWrapper,
-  serializeAll,
   SerializeOptions,
   toJSON,
 } from '.';
@@ -18,11 +16,15 @@ export class SArray<
   value: Array<ValueT> = [];
 
   deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
-    return deserializeAll(buffer, this.value, opts).serializedLength;
+    let offset = 0;
+    this.map((element) => {
+      offset += element.deserialize(buffer.slice(offset), opts);
+    });
+    return offset;
   }
 
   serialize(opts?: SerializeOptions): Buffer {
-    return serializeAll(this.value, opts);
+    return Buffer.concat(this.map((element) => element.serialize(opts)));
   }
 
   getSerializedLength(opts?: SerializeOptions): number {
@@ -41,12 +43,16 @@ export class SArray<
         return fn(element, index);
       } catch (e) {
         if (e instanceof Error) {
-          const e2 = e as SArrayError<ValueT>;
-          e2.isSArrayError = true;
+          const e2 = new SArrayError(
+            `Error at element ${index}: ${e.message}`,
+            {cause: e}
+          );
           e2.element = element;
           e2.index = index;
+          throw e2;
+        } else {
+          throw e;
         }
-        throw e;
       }
     });
   }
@@ -84,12 +90,18 @@ export abstract class SDynamicArray<
 }
 
 /** Error augmented by SArray with index information. */
-export interface SArrayError<ValueT extends Serializable = Serializable>
-  extends Error {
+export class SArrayError<
+  ValueT extends Serializable = Serializable
+> extends Error {
+  constructor(message: string, {cause}: {cause: Error}) {
+    // @ts-ignore
+    super(message, {cause});
+    Object.setPrototypeOf(this, SArrayError.prototype);
+  }
   /** Indicates this is an SArrayError. */
-  isSArrayError: true;
+  isSArrayError: true = true;
   /** The element that raised the error. */
-  element: ValueT;
+  element!: ValueT;
   /** Index of the element that raised the error. */
-  index: number;
+  index!: number;
 }

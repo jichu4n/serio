@@ -14,7 +14,7 @@ import {
 export class SObject extends Serializable {
   deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
     const array = this.toSArray();
-    const readOffset = this.wrapSArrayError(() =>
+    const readOffset = this.wrapSArrayErrorAsSObjectError(() =>
       array.deserialize(buffer, opts)
     );
     const serializablePropertySpecs = getSerializablePropertySpecs(this);
@@ -30,22 +30,25 @@ export class SObject extends Serializable {
   }
 
   serialize(opts?: SerializeOptions): Buffer {
-    return this.wrapSArrayError(() => this.toSArray().serialize(opts));
+    return this.wrapSArrayErrorAsSObjectError(() =>
+      this.toSArray().serialize(opts)
+    );
   }
 
   getSerializedLength(opts?: SerializeOptions): number {
-    return this.wrapSArrayError(() =>
+    return this.wrapSArrayErrorAsSObjectError(() =>
       this.toSArray().getSerializedLength(opts)
     );
   }
 
   toJSON() {
+    const values = this.wrapSArrayErrorAsSObjectError(() =>
+      this.toSArray().toJSON()
+    );
     return fromPairs(
-      getSerializablePropertySpecs(this).map(({propertyKey, wrapperType}) => [
+      getSerializablePropertySpecs(this).map(({propertyKey}, i) => [
         propertyKey,
-        toJSON(
-          getSerializablePropertyOrWrapper(this, {propertyKey, wrapperType})
-        ),
+        values[i],
       ])
     );
   }
@@ -62,28 +65,42 @@ export class SObject extends Serializable {
     return SArray.of(getAllSerializablePropertiesOrWrappers(this));
   }
 
-  private wrapSArrayError<FnT extends () => any>(fn: FnT): ReturnType<FnT> {
+  private wrapSArrayErrorAsSObjectError<FnT extends () => any>(
+    fn: FnT
+  ): ReturnType<FnT> {
     try {
       return fn();
     } catch (e) {
-      if (e instanceof Error && 'isSArrayError' in e && e['isSArrayError']) {
-        const e2 = e as SObjectError;
+      if (e instanceof SArrayError) {
+        const propertyKey: string =
+          getSerializablePropertySpecs(this)[e.index].propertyKey.toString();
+        // @ts-ignore
+        const cause: Error = e.cause;
+        const e2 = new SObjectError(
+          `Error in property ${propertyKey}: ${cause.message}`,
+          {cause}
+        );
         e2.isSObjectError = true;
-        e2.propertyKey =
-          getSerializablePropertySpecs(this)[e2.index].propertyKey;
-        e2.message = `${e2.propertyKey.toString()}: ${e2.message}`;
+        e2.propertyKey = propertyKey;
+        throw e2;
+      } else {
+        throw e;
       }
-      throw e;
     }
   }
 }
 
 /** Error augmented by SObject with property information. */
-export interface SObjectError extends SArrayError {
+export class SObjectError extends Error {
+  constructor(message: string, {cause}: {cause: Error}) {
+    // @ts-ignore
+    super(message, {cause});
+    Object.setPrototypeOf(this, SObjectError.prototype);
+  }
   /** Indicates this is an SObjectError. */
-  isSObjectError: true;
+  isSObjectError: true = true;
   /** The property that raised the error. */
-  propertyKey: string | symbol;
+  propertyKey!: string;
 }
 
 /** Decorator for Serializable properties of an SObject. */

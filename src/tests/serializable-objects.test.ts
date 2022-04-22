@@ -2,11 +2,12 @@ import {
   serialize,
   serializeAs,
   SObject,
+  SObjectError,
   SStringNT,
   SUInt16BE,
-  SUInt32LE,
   SUInt8,
 } from '../';
+import {ThrowingSerializable} from './throwing-serializable';
 
 /** Example object that exercises `serialize` and `serializeAs`. */
 class TestObjectA extends SObject {
@@ -48,6 +49,19 @@ class TestObjectC extends SObject {
   set fullName(fullName: string) {
     [this.firstName, this.lastName] = fullName.split(' ');
   }
+}
+
+/** Object that contains a ThrowingSerializable. */
+class ThrowingObject extends SObject {
+  constructor(public errorMessage?: string) {
+    super();
+  }
+
+  @serializeAs(SUInt16BE)
+  prop1 = 0;
+
+  @serialize
+  prop2 = new ThrowingSerializable(this.errorMessage);
 }
 
 describe('SObject', function () {
@@ -178,5 +192,42 @@ describe('SObject', function () {
 
     const obj3 = TestObjectB.with({firstName: 'Jane', lastName: 'Doe'});
     expect(obj3.toJSON()).toStrictEqual({fullName: 'Jane Doe'});
+  });
+
+  test('error handling', function () {
+    const obj1 = new ThrowingObject('test error');
+
+    expect(() => obj1.serialize()).toThrow(SObjectError);
+    try {
+      obj1.serialize();
+    } catch (e) {
+      const e2 = e as SObjectError;
+      expect(e2.isSObjectError).toStrictEqual(true);
+      expect(e2.propertyKey).toStrictEqual('prop2');
+      // @ts-ignore
+      expect(e2.cause.message).toBe('test error');
+    }
+
+    expect(() => obj1.deserialize(Buffer.alloc(100))).toThrow(SObjectError);
+    try {
+      obj1.deserialize(Buffer.alloc(100));
+    } catch (e) {
+      const e2 = e as SObjectError;
+      expect(e2.isSObjectError).toStrictEqual(true);
+      expect(e2.propertyKey).toStrictEqual('prop2');
+      // @ts-ignore
+      expect(e2.cause.message).toBe('test error');
+    }
+
+    expect(() => obj1.toJSON()).toThrow(SObjectError);
+    try {
+      obj1.toJSON();
+    } catch (e) {
+      const e2 = e as SObjectError;
+      expect(e2.isSObjectError).toStrictEqual(true);
+      expect(e2.propertyKey).toStrictEqual('prop2');
+      // @ts-ignore
+      expect(e2.cause.message).toBe('test error');
+    }
   });
 });
