@@ -25,7 +25,7 @@ Make sure to enable the following settings in your `tsconfig.json`:
 ### Basic usage
 
 ```ts
-import { SObject, SUInt32LE, serializeAs } from serio;
+import {SObject, SUInt32LE, serializeAs} from serio;
 
 /** A class that maps to the following C struct:
  *
@@ -35,13 +35,13 @@ import { SObject, SUInt32LE, serializeAs } from serio;
  *     };
  */
 class Position extends SObject {
-	@serializeAs(SUInt32LE)
-	x = 0;
-	@serializeAs(SUInt32LE)
-	y = 0;
+  @serializeAs(SUInt32LE)
+  x = 0;
+  @serializeAs(SUInt32LE)
+  y = 0;
 
-	// Properties without a decorator are ignored for serialization.
-	foo = 100;
+  // Properties without a decorator are ignored for serialization.
+  foo = 100;
 }
 
 
@@ -150,7 +150,7 @@ const str2 = SStringNT.of('hello world!');
 // ...by decoding from a buffer using the default encoding (UTF-8):
 const str3 = SStringNT.from(buffer.slice(...));
 // ...by decoding from a buffer using a different encoding:
-const str4 = SStringNT.from(buffer.slice(...), { encoding: 'gb2312' });
+const str4 = SStringNT.from(buffer.slice(...), {encoding: 'gb2312'});
 
 // Manipulate the wrapped value:
 str1.value = 'foo bar';
@@ -158,17 +158,17 @@ str1.value = 'foo bar';
 // Serialize to a Buffer using the default encoding (UTF-8):
 const buf1 = str1.serialize();
 // ...or using a different encoding:
-const buf2 = str1.serialize({ encoding: 'win1251' });
+const buf2 = str1.serialize({encoding: 'win1251'});
 // Deserialize from a Buffer using the default encoding:
 str1.deserialize(buffer.slice(...));
 // ...or using a different encoding:
-str1.deserialize(buffer.slice(...), { encoding: 'win1251' });
+str1.deserialize(buffer.slice(...), {encoding: 'win1251'});
 
 const size = SStringNT.of('hi').getSerializedLength(); // => 3
 ```
 
 If your application uses a non-UTF-8 encoding by default, you can also change the
-default encoding used by serio to avoid having to pass `{ encoding: 'XX' }`
+default encoding used by serio to avoid having to pass `{encoding: 'XX'}`
 every time:
 
 ```ts
@@ -273,6 +273,15 @@ const arr4 = SArray.as(SArray.as(SUInt8)).of([
   [2, 2, 2],
 ]);
 console.log(arr4.value[2][0]); // => 2
+
+// Serialization / deserialization options are passed through to contained elements.
+const arr5 = SArray.as(SStringNT).of(['你好', '世界']);
+console.log([
+  arr5.getSerializedLength(), // => 14
+  arr5.getSerializedLength({encoding: 'gb2312'}), // 10
+]);
+arr5.serialize({encoding: 'gb2312'});
+arr5.deserialize(buffer, {encoding: 'gb2312'});
 ```
 
 ### Objects
@@ -380,6 +389,11 @@ class Point {
   @serializeAs(SStringNT.ofLength(31))
   label = '';
 }
+
+// Serialization / deserialization options are passed through to properties.
+const obj1 = Point.with({label: '你好'});
+obj1.serialize({encoding: 'gb2312'});
+obj1.deserialize(buffer, {encoding: 'gb2312'});
 ```
 
 Example combining objects and arrays:
