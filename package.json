@@ -1,6 +1,6 @@
 {
   "name": "serio",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Smart binary serialization in TypeScript",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -9,7 +9,7 @@
     "build:docs": "rm -rf ./docs/ && typedoc",
     "lint": "prettier --check .",
     "test": "jest",
-    "prepare": "npm run lint && npm run build && npm test"
+    "prepack": "npm run lint && npm run build && npm test && rm -r ./dist/tests"
   },
   "repository": {
     "type": "git",
@@ -47,5 +47,8 @@
     "lodash": "^4.17.21",
     "reflect-metadata": "^0.1.13",
     "smart-buffer": "^4.2.0"
-  }
+  },
+  "files": [
+    "dist"
+  ]
 }
