@@ -310,17 +310,17 @@ Example showing wrapping numeric values with `@serializeAs`:
  *     };
  */
 class Position extends SObject {
-	// This will wrap x using SUInt32LE for serialization / deserialization
-	// behind the scenes, but allows it to be manipulated as a normal class
-	// property of type number.
-	@serializeAs(SUInt32LE)
-	x = 0;
+  // This will wrap x using SUInt32LE for serialization / deserialization
+  // behind the scenes, but allows it to be manipulated as a normal class
+  // property of type number.
+  @serializeAs(SUInt32LE)
+  x = 0;
 
-	@serializeAs(SUInt32LE)
-	y = 0;
+  @serializeAs(SUInt32LE)
+  y = 0;
 
-	// Properties without a decorator are ignored for serialization.
-	foo = 100;
+  // Properties without a decorator are ignored for serialization.
+  foo = 100;
 }
 
 
