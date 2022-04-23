@@ -12,10 +12,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm install
-      - run: npm run build
-      - run: npm run lint
-      - run: npm test
+      - name: Package test
+        run: npm install && ./src/tests/package-test.sh
   deploy-docs:
     runs-on: ubuntu-latest
     steps:
@@ -24,9 +22,10 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 16
-      - run: npm install
-      - run: npm run build:docs
-      - uses: peaceiris/actions-gh-pages@v3
+      - name: Build docs
+        run: npm install && npm run build:docs
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs
