@@ -94,7 +94,7 @@ const size = obj2.getSerializedLength();
 
 ### Integers
 
-Serio provides a set of `Serializable` wrappers for common integer types.
+serio provides a set of `Serializable` wrappers for common integer types.
 
 Example usage:
 
@@ -219,6 +219,66 @@ str2.deserialize(Buffer.from('hello', 'utf-8'));
 console.log(str2.value); // => 'hel'
 ```
 
+### Arrays
+
+serio provides an `SArray` class for working with array values. An `SArray`
+instance can wrap an array of other `Serializables`:
+
+```ts
+// Create an empty SArray object:
+const arr1 = new SArray<SUInt32LE>();
+// ...with an initial set of values:
+const arr2 = SArray.of([obj1, obj2, obj3]);
+// ...with an element value repeated N times:
+const arr3 = SArray.ofLength(5, () => SUInt32LE.of(42));
+// ...by decoding from a buffer:
+const arr4 = SArray.ofLength(5, () => SUInt32LE.of(0)).from(buffer);
+
+// The underlying array can be manipulated via the `value` property:
+arr1.value.forEach(...);
+arr1.value = [obj1, obj2];
+
+
+// Serialize to Buffer:
+const buf1 = arr1.serialize();
+
+// Deserialize from a Buffer into the current elements in `value`:
+arr1.deserialize(buffer);
+
+// Returns the total serialized length of all elements in `value`:
+const size = arr1.getSerializedLength();
+```
+
+`SArray` can also be combined with wrappers such as `SUInt32LE` and `SStringNT`
+to directly work with arrays of numbers, strings or other raw values. This
+wrapping mechanism also allows for nested arrays. For example:
+
+```ts
+// Create an SArray equivalent to uint8_t[5], initialized to 0.
+const arr1 = SArray.serializeAs(SUInt8).ofLength(5, 0);
+console.log(arr1.value); // [0, 0, 0, 0, 0]
+
+// Create an SArray equivalent to uint8_t[5], with initial values.
+const arr2 = SArray.serializeAs(SUInt8).ofLength(5, (idx) => idx);
+console.log(arr2.value); // [0, 1, 2, 3, 4]
+
+// Create an SArray of strings from an existing array:
+const arr3 = SArray.serializeAs(SStringNT.ofLength(10)).of([
+  'hello',
+  'foo',
+  'bar',
+]);
+console.log(arr3.value); // 'hello', 'foo', 'bar'
+
+// Create a 3x3 2-D SArray:
+const arr4 = SArray.serializeAs(SArray.serializeAs(SUInt8)).of([
+  [0, 0, 0],
+  [1, 1, 1],
+  [2, 2, 2],
+]);
+console.log(arr4.value[2][0]); // => 2
+```
+
 ### Objects
 
 serio provides a base class `SObject` and a set of decorators for defining
@@ -324,6 +384,33 @@ class Point {
   @serializeAs(SStringNT.ofLength(31))
   label = '';
 }
+```
+
+Example combining objects and arrays:
+
+```ts
+class ExampleObject extends SObject {
+  // Equivalent C: Point[10]
+  @serializeAs(SArray)
+  prop1 = Array(10)
+    .fill()
+    .map(() => new Point());
+
+  // Equivalent C: uint8_t[10]
+  @serializeAs(SArray.serializeAs(SUInt8))
+  prop2 = Array(10).fill(0);
+
+  // Equivalent C: char[2][2][10]
+  @serializeAs(SArray.serializeAs(SArray.serializeAs(SStringNT.ofLength(10))))
+  prop3 = [
+    ['hello', 'world'],
+    ['foo', 'bar'],
+  ];
+}
+
+// ExampleObject[5]
+const arr1 = SArray.ofLength(5, () => new ExampleObject());
+console.log(arr1.value[0].prop3[0][0]); // => 'hello'
 ```
 
 ## About

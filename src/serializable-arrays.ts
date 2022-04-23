@@ -43,7 +43,7 @@ export class SArray<
    */
   static ofLength<ValueT extends Serializable = Serializable>(
     length: number,
-    elementGenerator: () => ValueT
+    elementGenerator: (idx: number) => ValueT
   ): SArray<ValueT> {
     return SArray.of<Array<ValueT>, SArray<ValueT>>(
       times(length, elementGenerator)
@@ -52,7 +52,7 @@ export class SArray<
 
   /** Returns an SArrayWithWrapper class that wraps elements with the provided
    * SerializableWrapper. */
-  static withWrapper<WrapperT extends SerializableWrapper<any>>(
+  static serializeAs<WrapperT extends SerializableWrapper<any>>(
     wrapperType: new () => WrapperT
   ) {
     return class extends SArrayWithWrapper<WrappedValueT<WrapperT>, WrapperT> {
@@ -129,7 +129,7 @@ export abstract class SArrayWithWrapper<
     length: number,
     elementValueOrGenerator:
       | WrappedValueT<WrapperT>
-      | (() => WrappedValueT<WrapperT>)
+      | ((idx: number) => WrappedValueT<WrapperT>)
   ): SArrayWithWrapper<WrappedValueT<WrapperT>, WrapperT> {
     const elementGenerator =
       typeof elementValueOrGenerator === 'function'
