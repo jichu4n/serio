@@ -50,7 +50,7 @@ fi
 mkdir -p "$TEMP_DIR"
 cd "$TEMP_DIR"
 npm init -y
-npm install --save ts-node "$package_file"
+npm install --save ts-node typescript '@types/node' "$package_file"
 echo
 
 echo "> Running test script"
