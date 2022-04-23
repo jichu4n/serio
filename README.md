@@ -255,23 +255,19 @@ wrapping mechanism also allows for nested arrays. For example:
 
 ```ts
 // Create an SArray equivalent to uint8_t[5], initialized to 0.
-const arr1 = SArray.serializeAs(SUInt8).ofLength(5, 0);
+const arr1 = SArray.as(SUInt8).ofLength(5, 0);
 console.log(arr1.value); // [0, 0, 0, 0, 0]
 
 // Create an SArray equivalent to uint8_t[5], with initial values.
-const arr2 = SArray.serializeAs(SUInt8).ofLength(5, (idx) => idx);
+const arr2 = SArray.as(SUInt8).ofLength(5, (idx) => idx);
 console.log(arr2.value); // [0, 1, 2, 3, 4]
 
 // Create an SArray of strings from an existing array:
-const arr3 = SArray.serializeAs(SStringNT.ofLength(10)).of([
-  'hello',
-  'foo',
-  'bar',
-]);
+const arr3 = SArray.as(SStringNT.ofLength(10)).of(['hello', 'foo', 'bar']);
 console.log(arr3.value); // 'hello', 'foo', 'bar'
 
 // Create a 3x3 2-D SArray:
-const arr4 = SArray.serializeAs(SArray.serializeAs(SUInt8)).of([
+const arr4 = SArray.as(SArray.as(SUInt8)).of([
   [0, 0, 0],
   [1, 1, 1],
   [2, 2, 2],
@@ -397,11 +393,11 @@ class ExampleObject extends SObject {
     .map(() => new Point());
 
   // Equivalent C: uint8_t[10]
-  @serializeAs(SArray.serializeAs(SUInt8))
+  @serializeAs(SArray.as(SUInt8))
   prop2 = Array(10).fill(0);
 
   // Equivalent C: char[2][2][10]
-  @serializeAs(SArray.serializeAs(SArray.serializeAs(SStringNT.ofLength(10))))
+  @serializeAs(SArray.as(SArray.as(SStringNT.ofLength(10))))
   prop3 = [
     ['hello', 'world'],
     ['foo', 'bar'],

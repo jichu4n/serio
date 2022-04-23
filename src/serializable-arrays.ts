@@ -52,7 +52,7 @@ export class SArray<
 
   /** Returns an SArrayWithWrapper class that wraps elements with the provided
    * SerializableWrapper. */
-  static serializeAs<WrapperT extends SerializableWrapper<any>>(
+  static as<WrapperT extends SerializableWrapper<any>>(
     wrapperType: new () => WrapperT
   ) {
     return class extends SArrayWithWrapper<WrappedValueT<WrapperT>, WrapperT> {

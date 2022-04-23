@@ -10,13 +10,13 @@ import {
 } from '..';
 
 class TestObjectA extends SObject {
-  @serializeAs(SArray.serializeAs(SUInt16LE))
+  @serializeAs(SArray.as(SUInt16LE))
   prop1 = times(10, () => 0);
 
-  @serializeAs(SArray.serializeAs(SArray.serializeAs(SUInt16LE)))
+  @serializeAs(SArray.as(SArray.as(SUInt16LE)))
   prop2 = times(10, () => times(10, () => 0));
 
-  @serializeAs(SArray.serializeAs(SStringNT.ofLength(5)))
+  @serializeAs(SArray.as(SStringNT.ofLength(5)))
   prop3 = times(10, () => '');
 }
 const TEST_OBJECT_A_SIZE = 10 * 2 + 10 * 10 * 2 + 10 * 5;
