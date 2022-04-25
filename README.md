@@ -66,15 +66,14 @@ const size = pos1.getSerializedLength();  // => 8
 const bytesRead = pos1.deserialize(buffer.slice(...));  // => 8
 ```
 
-## Documentation
+## Serializable
 
-### Serializable
+[`Serializable`](https://jichu4n.github.io/serio/classes/Serializable.html) is
+the base class that all serializable values (such as `SUInt8` and `SObject`)
+derive from. It provides a common interface for basic operations such as
+creating, serializing and deserializing values.
 
-This is the base class that all serializable values (such as `SUInt8` and
-`SObject`) derive from. It provides a common interface for
-basic operations such as creating, serializing and deserializing values.
-
-Example usage of any `Serializable` implementation `X`:
+Example usage of a `Serializable` class `X`:
 
 ```ts
 // Create an instance using default values:
@@ -92,7 +91,7 @@ obj2.deserialize(buffer);
 const size = obj2.getSerializedLength();
 ```
 
-### Integers
+## Integers
 
 serio provides a set of `Serializable` wrappers for common integer types.
 
@@ -119,26 +118,30 @@ const size = v2.getSerializedLength(); // => 4
 
 The full list of provided integer types:
 
-|    Type     | Size (bytes) |  Signed  |  Endianness   |
-| :---------: | :----------: | :------: | :-----------: |
-|  `SUInt8`   |      1       | Unsigned |      N/A      |
-|   `SInt8`   |      1       |  Signed  |      N/A      |
-| `SUInt16LE` |      2       | Unsigned | Little endian |
-| `SInt16LE`  |      2       |  Signed  | Little endian |
-| `SUInt16BE` |      2       | Unsigned |  Big endian   |
-| `SInt16BE`  |      2       |  Signed  |  Big endian   |
-| `SUInt32LE` |      4       | Unsigned | Little endian |
-| `SInt32LE`  |      4       |  Signed  | Little endian |
-| `SUInt32BE` |      4       | Unsigned |  Big endian   |
-| `SInt32BE`  |      4       |  Signed  |  Big endian   |
+|                                 Type                                  | Size (bytes) |  Signed  |  Endianness   |
+| :-------------------------------------------------------------------: | :----------: | :------: | :-----------: |
+|    [`SUInt8`](https://jichu4n.github.io/serio/classes/SUInt8.html)    |      1       | Unsigned |      N/A      |
+|     [`SInt8`](https://jichu4n.github.io/serio/classes/SInt8.html)     |      1       |  Signed  |      N/A      |
+| [`SUInt16LE`](https://jichu4n.github.io/serio/classes/SUInt16LE.html) |      2       | Unsigned | Little endian |
+|  [`SInt16LE`](https://jichu4n.github.io/serio/classes/SInt16LE.html)  |      2       |  Signed  | Little endian |
+| [`SUInt16BE`](https://jichu4n.github.io/serio/classes/SUInt16BE.html) |      2       | Unsigned |  Big endian   |
+|  [`SInt16BE`](https://jichu4n.github.io/serio/classes/SInt16BE.html)  |      2       |  Signed  |  Big endian   |
+| [`SUInt32LE`](https://jichu4n.github.io/serio/classes/SUInt32LE.html) |      4       | Unsigned | Little endian |
+|  [`SInt32LE`](https://jichu4n.github.io/serio/classes/SInt32LE.html)  |      4       |  Signed  | Little endian |
+| [`SUInt32BE`](https://jichu4n.github.io/serio/classes/SUInt32BE.html) |      4       | Unsigned |  Big endian   |
+|  [`SInt32BE`](https://jichu4n.github.io/serio/classes/SInt32BE.html)  |      4       |  Signed  |  Big endian   |
 
-### Strings
+## Strings
 
-serio provides wrappers for string types. It uses the
-[iconv-lite](https://github.com/ashtuchkin/iconv-lite) library for encoding /
-decoding text in various character sets.
+serio provides the
+[`SStringNT`](https://jichu4n.github.io/serio/classes/SStringNT.html) class for
+working with string types. It uses the
+[iconv-lite](https://github.com/ashtuchkin/iconv-lite) library under the hood
+for encoding / decoding; see
+[here](https://github.com/ashtuchkin/iconv-lite/wiki/Supported-Encodings) for
+the list of supported encodings.
 
-#### Variable-length strings
+### Variable-length strings
 
 Example usage:
 
@@ -180,11 +183,12 @@ setDefaultEncoding('cp437');
 const buf1 = str1.serialize();
 ```
 
-#### Fixed sized strings
+### Fixed sized strings
 
-Fixed size strings are equivalent to C character arrays (`char[N]`) and will
-zero pad or truncate data to a fixed size during serialization and
-deserialization.
+[SStringNT.ofLength(N)](https://jichu4n.github.io/serio/classes/SStringNT.html#ofLength)
+can be used to represent fixed size strings (equivalent to C character arrays
+`char[N]`). An instance of `SStringNT.ofLength(N)` will zero pad / truncate the
+raw data to size N during serialization and deserialization.
 
 Example usage:
 
@@ -219,10 +223,12 @@ str2.deserialize(Buffer.from('hello', 'utf-8'));
 console.log(str2.value); // => 'hel'
 ```
 
-### Arrays
+## Arrays
 
-serio provides an `SArray` class for working with array values. An `SArray`
-instance can wrap an array of other `Serializables`:
+serio provides the
+[`SArray`](https://jichu4n.github.io/serio/classes/SArray.html) class for
+working with array values. An `SArray` instance can wrap an array of other
+`Serializables`, including `SObject`s and other `SArray`s:
 
 ```ts
 // Create an empty SArray object:
@@ -250,8 +256,9 @@ const size = arr1.getSerializedLength();
 ```
 
 `SArray` can also be combined with wrappers such as `SUInt32LE` and `SStringNT`
-to directly work with arrays of numbers, strings or other raw values. This
-wrapping mechanism also allows for nested arrays. For example:
+to make it easier to work with arrays of numbers, strings or other raw values.
+Since `SArray` is itself a wrapper class for arrays, This mechanism also makes
+it easy to work with multi-dimensional arrays. For example:
 
 ```ts
 // Create an SArray equivalent to uint8_t[5], initialized to 0.
@@ -284,22 +291,27 @@ arr5.serialize({encoding: 'gb2312'});
 arr5.deserialize(buffer, {encoding: 'gb2312'});
 ```
 
-### Objects
+## Objects
 
-serio provides a base class `SObject` and a set of decorators for defining
-serializable objects (i.e. C/C++ `struct`s).
+serio provides the
+[`SObject`](https://jichu4n.github.io/serio/classes/SObject.html) class for
+defining serializable objects that are conceptually equivalent to C/C++
+`struct`s.
 
 To define a serializable object:
 
-1. Create a normal TypeScript class that derives from `SObject`, i.e. `class X extends SObject`.
-2. Use decorators to annotate class properties that should be serialized /
-   deserialized:
-   - Use `@serialize` if the property is itself a `Serializable`, such as a
-     nested object;
-   - Use `@serializeAs(WrapperClass)` if the property should be wrapped with a
-     `Serializable` wrapper, such as an integer or a string.
+1. Create a TypeScript class that derives from
+   [`SObject`](https://jichu4n.github.io/serio/classes/SObject.html), i.e.
+   `class X extends SObject`.
+2. Use the following decorators to annotate class properties that should be
+   serialized / deserialized:
+   - [`@serialize prop = X;`](https://jichu4n.github.io/serio/modules.html#serialize) if the
+     property is itself a `Serializable`, such as another object;
+   - [`@serializeAs(WrapperClass) prop = X;`](https://jichu4n.github.io/serio/modules.html#serializeAs) if the
+     property should be wrapped with a `Serializable` wrapper, such as an
+     integer or a string.
 
-Example showing wrapping numeric values with `@serializeAs`:
+Basic example:
 
 ```ts
 /** A class that maps to the following C struct:
@@ -345,7 +357,7 @@ const size = pos1.getSerializedLength();  // => 8
 const bytesRead = pos1.deserialize(buffer.slice(...));  // => 8
 ```
 
-Advanced example showing nesting, `@serialize`, and wrapping getter / setters:
+A more advanced example showing nesting, `@serialize`, and wrapping getter / setters:
 
 ```ts
 /** A class that maps to the following C struct:
@@ -418,9 +430,94 @@ class ExampleObject extends SObject {
   ];
 }
 
-// ExampleObject[5]
+// Equivalent C: ExampleObject[5]
 const arr1 = SArray.ofLength(5, () => new ExampleObject());
 console.log(arr1.value[0].prop3[0][0]); // => 'hello'
+```
+
+## Creating new `Serializable` classes
+
+To define your own `Serializable` classes that can be used with `SArray`, `SObject`
+etc, you can extend the
+[`Serializable`](https://jichu4n.github.io/serio/classes/Serializable.html)
+abstract class and provide the required method implementations:
+
+```ts
+class MyType extends Serializable {
+  x = 0;
+  name = SStringNT.ofLength(32);
+
+  /** Serializes this value into a buffer. */
+  serialize(opts?: SerializeOptions): Buffer {
+    const buffer = Buffer.alloc(this.getSerializedLength(opts));
+    buffer.writeUInt8(this.x, 0);
+    this.name.serialize(opts).copy(buffer, 1);
+    return buffer;
+  }
+  /** Deserializes a buffer into this value. */
+  deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
+    this.x = buffer.readUInt8(0);
+    this.name.deserialize(buffer.slice(1), opts);
+    return this.getSerializedLength(opts);
+  }
+  /** Computes the serialized length of this value. */
+  getSerializedLength(opts?: SerializeOptions): number {
+    return 1 + this.name.getSerializedLength(opts);
+  }
+
+  /** Optionally, define how this class should be JSONified. */
+  toJSON() {
+    return {x: this.x, name: this.name};
+  }
+}
+
+// MyType can be constructed like other `Serializable`s:
+const obj1 = new MyType();
+const obj2 = MyType.from(buffer);
+
+// MyType can be used together with SArray, SObject etc:
+const arr1 = SArray.of([new MyType(), new MyType()]);
+class SomeObject extends SObject {
+  @serialize
+  myType = new MyType();
+}
+```
+
+To define a class that wraps a raw value, to be used with `@serializeAs()` and
+`SArray.as()`, you can instead extend the
+[`SerializableWrapper`](https://jichu4n.github.io/serio/classes/SerializableWrapper.html)
+class:
+
+```ts
+/** An example class that wraps a number. */
+class MyWrapperType extends SerializableWrapper<number> {
+  // A SerializableWrapper must have a `value` property that represents the raw
+  // value to be wrapped.
+  value = 0;
+
+  // Define `serialize()`, `deserialize()` and `getSerializedLength()` as above
+  serialize(opts?: SerializeOptions): Buffer {
+    /* ... */
+  }
+  deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
+    /* ... */
+  }
+  getSerializedLength(opts?: SerializeOptions): number {
+    /* ... */
+  }
+}
+
+// MyWrapperType can be constructed similar to other wrappers such as `SInt8`:
+const obj1 = new MyWrapperType();
+const obj2 = MyWrapperType.from(buffer);
+const obj3 = MyWrapperType.of(42);
+
+// MyWrapperType can be used with `SArray.as()` and `@serializeAs`:
+const arr1 = SArray.as(MyWrapperType).of([1, 2, 3]);
+class SomeObject extends SObject {
+  @serializeAs(MyWrapperType)
+  foo: number = 0;
+}
 ```
 
 ## About
