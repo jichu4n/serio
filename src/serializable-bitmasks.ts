@@ -1,4 +1,5 @@
 import sum from 'lodash/sum';
+import fromPairs from 'lodash/fromPairs';
 import {SerializableWrapper} from './';
 import {DeserializeOptions, SerializeOptions} from './serializable';
 
@@ -72,6 +73,15 @@ export abstract class SBitmask extends SerializableWrapper<number> {
   getSerializedLength(opts?: SerializeOptions): number {
     const wrapper = new this.wrapperType();
     return wrapper.getSerializedLength(opts);
+  }
+
+  toJSON() {
+    return fromPairs(
+      getSBitfieldSpecs(this).map(({propertyKey}) => [
+        propertyKey,
+        (this as any)[propertyKey],
+      ])
+    );
   }
 }
 

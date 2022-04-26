@@ -32,9 +32,14 @@ describe('SBitmask', function () {
     expect(c1.g).toStrictEqual(0b010);
     expect(c1.b).toStrictEqual(0b10);
 
+    const c2 = Color8Bit.of(0b01111010);
+    expect(c2.r).toStrictEqual(0b011);
+    expect(c2.g).toStrictEqual(0b110);
+    expect(c2.b).toStrictEqual(0b10);
+
     // Overflowing bits in each field should be masked out
-    const c2 = Color8Bit.with({b: 0b11111});
-    expect(c2.serialize()).toStrictEqual(Buffer.of(0b00000011));
+    const c3 = Color8Bit.with({b: 0b11111});
+    expect(c3.serialize()).toStrictEqual(Buffer.of(0b00000011));
   });
 
   test('error handling', function () {
@@ -42,5 +47,20 @@ describe('SBitmask', function () {
       const bm1 = new TestInvalidObject();
       bm1.serialize();
     }).toThrow();
+  });
+
+  test('toJSON', function () {
+    expect(new Color8Bit().toJSON()).toStrictEqual({
+      r: 0,
+      g: 0,
+      b: 0,
+    });
+    expect(
+      Color8Bit.with({r: 0b100, g: 0b101, b: 0b01}).toJSON()
+    ).toStrictEqual({
+      r: 0b100,
+      g: 0b101,
+      b: 0b01,
+    });
   });
 });

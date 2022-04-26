@@ -435,6 +435,48 @@ const arr1 = SArray.ofLength(5, () => new ExampleObject());
 console.log(arr1.value[0].prop3[0][0]); // => 'hello'
 ```
 
+## Bitmasks
+
+serio provides the
+[`SBitmask`](https://jichu4n.github.io/serio/classes/SBitmask.html) class for
+working with bitmask values that represent the binary OR of several fields. The
+interface is similar to `SObject`. Example usage:
+
+```ts
+/** An 8-bit color in the format RRR GG BB (see
+ * https://en.wikipedia.org/wiki/8-bit_color).
+ *
+ * SBitmask.as(wrapper type) produces a base class that serializes
+ * to the specified length.
+ */
+class Color8Bit extends SBitmask.as(SUInt8) {
+  // @bitfield(number of bits) is used to annotate the fields that go into the
+  // bitmask, from most significant to least significant.
+  @bitfield(3)
+  r = 0;
+  @bitfield(3)
+  g = 0;
+  @bitfield(2)
+  b = 0;
+}
+
+const c1 = new Color8Bit();
+c1.serialize(); // => Buffer.of(0b00000000)
+c1.r = 0b111;
+c1.g = 0b001;
+c1.serialize(); // => Buffer.of(0b11100100)
+
+const c2 = Color8Bit.with({r: 0b000, g: 0b111, b: 0b01});
+c2.serialize(); // => Buffer.of(0b00011101)
+console.log(c2.value); // => 0b00011101
+
+c2.deserialize(Buffer.of(0b11111111));
+console.log(c2.toJSON()); // => {r: 7, g: 7, b: 3}
+
+const c3 = Color8Bit.of(0b11100010);
+console.log(c3.toJSON()); // => {r: 7, g: 0, b: 2}
+```
+
 ## Creating new `Serializable` classes
 
 To define your own `Serializable` classes that can be used with `SArray`, `SObject`
