@@ -9,6 +9,17 @@ class Color8Bit extends SBitmask.as(SUInt8) {
   b = 0;
 }
 
+class TestBooleanObject extends SBitmask.as(SUInt8) {
+  @bitfield(1, Boolean)
+  field1 = false;
+
+  @bitfield(6)
+  field2 = 0;
+
+  @bitfield(1, Boolean)
+  field3 = false;
+}
+
 class TestInvalidObject extends SBitmask.as(SUInt8) {
   @bitfield(7)
   prop = 0;
@@ -40,6 +51,22 @@ describe('SBitmask', function () {
     // Overflowing bits in each field should be masked out
     const c3 = Color8Bit.with({b: 0b11111});
     expect(c3.serialize()).toStrictEqual(Buffer.of(0b00000011));
+  });
+
+  test('boolean flag', function () {
+    const bm1 = new TestBooleanObject();
+    expect(bm1.serialize()).toStrictEqual(Buffer.of(0b00000000));
+    bm1.field1 = true;
+    bm1.field2 = 2;
+    bm1.field3 = true;
+    expect(bm1.serialize()).toStrictEqual(Buffer.of(0b10000101));
+
+    bm1.deserialize(Buffer.of(0b10010000));
+    expect(bm1.toJSON()).toStrictEqual({
+      field1: true,
+      field2: 0b001000,
+      field3: false,
+    });
   });
 
   test('error handling', function () {

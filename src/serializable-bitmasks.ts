@@ -38,7 +38,7 @@ export abstract class SBitmask extends SerializableWrapper<number> {
     for (let i = bitfields.length - 1; i >= 0; --i) {
       const {propertyKey, length} = bitfields[i];
       const fieldMask = 2 ** length - 1;
-      wrapper.value |= ((this as any)[propertyKey] & fieldMask) << offset;
+      wrapper.value |= (((this as any)[propertyKey] | 0) & fieldMask) << offset;
       offset += length;
     }
     return wrapper.value;
@@ -50,9 +50,11 @@ export abstract class SBitmask extends SerializableWrapper<number> {
 
     let offset = 0;
     for (let i = bitfields.length - 1; i >= 0; --i) {
-      const {propertyKey, length} = bitfields[i];
+      const {propertyKey, length, valueType} = bitfields[i];
       const fieldMask = 2 ** length - 1;
-      (this as any)[propertyKey] = (newValue >> offset) & fieldMask;
+      (this as any)[propertyKey] = (valueType || Number)(
+        (newValue >> offset) & fieldMask
+      );
       offset += length;
     }
   }
@@ -86,7 +88,7 @@ export abstract class SBitmask extends SerializableWrapper<number> {
 }
 
 /** Decorator for bitfields in an SBitmask. */
-export function bitfield(length: number) {
+export function bitfield(length: number, valueType?: SBitfieldValueType) {
   return function (target: Object, propertyKey: string | symbol) {
     const fieldSpecs = Reflect.getMetadata(
       SBITFIELD_SPECS_METADATA_KEY,
@@ -95,6 +97,7 @@ export function bitfield(length: number) {
     const fieldSpec: SBitfieldSpec = {
       propertyKey,
       length,
+      valueType,
     };
     if (fieldSpecs) {
       fieldSpecs.push(fieldSpec);
@@ -104,12 +107,17 @@ export function bitfield(length: number) {
   };
 }
 
+/** Types that can be passed to @bitfield(). */
+type SBitfieldValueType = typeof Number | typeof Boolean;
+
 /** Metadata stored for each field on an SBitmask's metadata. */
 interface SBitfieldSpec {
   /** The name of the field. */
   propertyKey: string | symbol;
   /** Number of bits associated with this field. */
   length: number;
+  /** Value constructor. */
+  valueType?: SBitfieldValueType;
 }
 
 /** Key for storing field information on an SBitmask's metadata. */

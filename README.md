@@ -479,6 +479,24 @@ const c3 = Color8Bit.of(0b11100010);
 console.log(c3.toJSON()); // => {r: 7, g: 0, b: 2}
 ```
 
+Boolean flags are also supported:
+
+```ts
+class MyBitmask extends SBitmask.as(SUInt8) {
+  @bitfield(1, Boolean)
+  flag1 = false;
+  @bitfield(2, Boolean)
+  flag2 = false;
+  @bitfield(6)
+  unused = 0;
+}
+
+const bm1 = MyBitmask.of(0b11000000);
+console.log(bm1.toJSON()); // => {flag1: true, flag2: true, unused: 0}
+bm1.flag1 = false;
+bm1.serialize(); // => Buffer.of(0b01000000)
+```
+
 ## Creating new `Serializable` classes
 
 To define your own `Serializable` classes that can be used with `SArray`, `SObject`
