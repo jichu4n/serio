@@ -7,10 +7,10 @@
 TEST_SCRIPT=$(cat <<'EOF'
 
 import assert from 'assert';
-import {SUInt8, SArray, SObject, serializeAs} from 'serio';
+import {SUInt8, SArray, SObject, field} from 'serio';
 
 class MyObject extends SObject {
-  @serializeAs(SArray.as(SUInt8))
+  @field.as(SArray.as(SUInt8))
 	prop1: Array<number> = Array(10).fill(0);
 }
 

@@ -1,23 +1,15 @@
-import {
-  serialize,
-  serializeAs,
-  SObject,
-  SObjectError,
-  SStringNT,
-  SUInt16BE,
-  SUInt8,
-} from '../';
+import {field, SObject, SObjectError, SStringNT, SUInt16BE, SUInt8} from '../';
 import {ThrowingSerializable} from './throwing-serializable';
 
-/** Example object that exercises `serialize` and `serializeAs`. */
+/** Example object that exercises `field` and `field.as`. */
 class TestObjectA extends SObject {
-  @serialize
+  @field
   prop1 = new SUInt8();
 
-  @serializeAs(SUInt16BE)
+  @field.as(SUInt16BE)
   prop2 = 0;
 
-  @serializeAs(SStringNT.ofLength(4))
+  @field.as(SStringNT.ofLength(4))
   prop3 = '';
 }
 
@@ -28,7 +20,7 @@ class TestObjectB extends SObject {
   firstName: string = '';
   lastName: string = '';
 
-  @serialize
+  @field
   get fullName(): SStringNT {
     return SStringNT.of(`${this.firstName} ${this.lastName}`);
   }
@@ -37,12 +29,12 @@ class TestObjectB extends SObject {
   }
 }
 
-/** Example object that tests serializeAs with accessors. */
+/** Example object that tests field.as with accessors. */
 class TestObjectC extends SObject {
   firstName: string = '';
   lastName: string = '';
 
-  @serializeAs(SStringNT)
+  @field.as(SStringNT)
   get fullName() {
     return `${this.firstName} ${this.lastName}`;
   }
@@ -57,15 +49,15 @@ class ThrowingObject extends SObject {
     super();
   }
 
-  @serializeAs(SUInt16BE)
+  @field.as(SUInt16BE)
   prop1 = 0;
 
-  @serialize
+  @field
   prop2 = new ThrowingSerializable(this.errorMessage);
 }
 
 describe('SObject', function () {
-  describe('serialize and serializeAs', function () {
+  describe('field and field.as', function () {
     test('using constructor and assignment', function () {
       const obj1 = new TestObjectA();
       expect(obj1.getSerializedLength()).toStrictEqual(
