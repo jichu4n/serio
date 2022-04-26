@@ -1,6 +1,6 @@
 # serio
 
-Fluent binary serialization in TypeScript.
+Fluent binary serialization / deserialization in TypeScript.
 
 If you need to work with binary protocols and file formats, or manipulate C/C++
 `struct`s and arrays from TypeScript, this library is for you. It provides an
