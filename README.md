@@ -469,6 +469,8 @@ c1.serialize(); // => Buffer.of(0b11100100)
 const c2 = Color8Bit.with({r: 0b000, g: 0b111, b: 0b01});
 c2.serialize(); // => Buffer.of(0b00011101)
 console.log(c2.value); // => 0b00011101
+c2.value = 0b11100010;
+console.log(c2.toJSON()); // => {r: 7, g: 0, b: 2}
 
 c2.deserialize(Buffer.of(0b11111111));
 console.log(c2.toJSON()); // => {r: 7, g: 7, b: 3}
