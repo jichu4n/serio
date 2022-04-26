@@ -1,5 +1,3 @@
-import 'error-cause/auto';
-
 export * from './serializable';
 export * from './serializable-wrapper';
 export * from './serializable-scalars';

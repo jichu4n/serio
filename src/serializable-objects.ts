@@ -92,10 +92,12 @@ export class SObject extends Serializable {
 /** Error augmented by SObject with property information. */
 export class SObjectError extends Error {
   constructor(message: string, {cause}: {cause: Error}) {
-    // @ts-ignore
-    super(message, {cause});
+    super(message);
     Object.setPrototypeOf(this, SObjectError.prototype);
+    this.cause = cause;
   }
+  /** The original error. */
+  cause: Error;
   /** The property that raised the error. */
   propertyKey!: string;
 }

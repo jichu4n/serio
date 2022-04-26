@@ -160,10 +160,12 @@ export class SArrayError<
   ValueT extends Serializable = Serializable
 > extends Error {
   constructor(message: string, {cause}: {cause: Error}) {
-    // @ts-ignore
-    super(message, {cause});
+    super(message);
     Object.setPrototypeOf(this, SArrayError.prototype);
+    this.cause = cause;
   }
+  /** The original error. */
+  cause: Error;
   /** Indicates this is an SArrayError. */
   isSArrayError: true = true;
   /** The element that raised the error. */
