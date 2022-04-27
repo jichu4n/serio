@@ -134,10 +134,15 @@ The full list of provided integer types:
 ## Strings
 
 serio provides the
-[`SStringNT`](https://jichu4n.github.io/serio/classes/SStringNT.html) class for
-working with string types. It uses the
-[iconv-lite](https://github.com/ashtuchkin/iconv-lite) library under the hood
-for encoding / decoding; see
+[`SStringNT`](https://jichu4n.github.io/serio/classes/SStringNT.html) and
+[`SString`](https://jichu4n.github.io/serio/classes/SString.html) classes for
+working with string values. Both classes wrap a string value and can have
+variable or fixed length. The difference is that `SStringNT` reads and writes
+C-style null-terminated strings, whereas `SString` reads and writes string
+values without a trailing null type.
+
+These classes uses the [iconv-lite](https://github.com/ashtuchkin/iconv-lite) library under
+the hood for encoding / decoding. See
 [here](https://github.com/ashtuchkin/iconv-lite/wiki/Supported-Encodings) for
 the list of supported encodings.
 
@@ -168,6 +173,7 @@ str1.deserialize(buffer.slice(...));
 str1.deserialize(buffer.slice(...), {encoding: 'win1251'});
 
 const size = SStringNT.of('hi').getSerializedLength(); // => 3
+const size = SString.of('hi').getSerializedLength(); // => 2
 ```
 
 If your application uses a non-UTF-8 encoding by default, you can also change the
@@ -217,10 +223,18 @@ const size2 = str1.getSerializedLength(); // => 3
 // serialization / deserialization:
 const str2 = SStringNT.ofLength(3).of('hello');
 console.log(str2.value); // => 'hello'
-const buf1 = str2.serialize(); // => 'he\x00'
-const size2 = str2.getSerializedLength(); // => 3
+str2.serialize(); // => 'he\x00'
+str2.getSerializedLength(); // => 3
 str2.deserialize(Buffer.from('hello', 'utf-8'));
 console.log(str2.value); // => 'hel'
+
+// SString works similarly but does not write a trailing null byte.
+const str3 = SString.ofLength(3).of('hello');
+console.log(str3.value); // => 'hello'
+str3.serialize(); // => 'hel'
+str3.getSerializedLength(); // => 3
+str3.deserialize(Buffer.from('hello', 'utf-8'));
+console.log(str3.value); // => 'hel'
 ```
 
 ## Arrays

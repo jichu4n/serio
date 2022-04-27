@@ -1,11 +1,6 @@
 import iconv from 'iconv-lite';
 import {SmartBuffer} from 'smart-buffer';
-import {
-  DeserializeOptions,
-  Serializable,
-  SerializableWrapper,
-  SerializeOptions,
-} from '.';
+import {DeserializeOptions, SerializableWrapper, SerializeOptions} from '.';
 
 /** Serializable wrapper class for null-terminated strings. */
 export class SStringNT extends SerializableWrapper<string> {
@@ -51,6 +46,48 @@ export class SStringNT extends SerializableWrapper<string> {
       throw new Error(`Invalid length ${length}`);
     }
     return class extends SStringNT {
+      length = length;
+    };
+  }
+}
+
+/** Serializable wrapper class for non-null-terminated strings. */
+export class SString extends SerializableWrapper<string> {
+  value: string = '';
+  /** Fixed serialized size, or undefined if dynamically sized. */
+  length?: number;
+
+  deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
+    if (this.length) {
+      buffer = buffer.slice(0, this.length);
+    }
+    this.value = decodeString(buffer, opts);
+    return buffer.length;
+  }
+
+  serialize(opts?: SerializeOptions): Buffer {
+    const encodedValue = encodeString(this.value, opts);
+    let writer: SmartBuffer;
+    if (this.length) {
+      writer = SmartBuffer.fromBuffer(Buffer.alloc(this.length));
+      writer.writeBuffer(encodedValue.slice(0, this.length));
+    } else {
+      writer = new SmartBuffer();
+      writer.writeBuffer(encodedValue);
+    }
+    return writer.toBuffer();
+  }
+
+  getSerializedLength(opts?: SerializeOptions): number {
+    return this.length || encodeString(this.value, opts).length;
+  }
+
+  /** Returns a SStringNT class that has a fixed serialized size. */
+  static ofLength(length: number) {
+    if (length < 0 || (length | 0) !== length) {
+      throw new Error(`Invalid length ${length}`);
+    }
+    return class extends SString {
       length = length;
     };
   }
