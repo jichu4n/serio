@@ -1,4 +1,5 @@
 import fromPairs from 'lodash/fromPairs';
+import mapValues from 'lodash/mapValues';
 import 'reflect-metadata';
 import {
   DeserializeOptions,
@@ -8,6 +9,7 @@ import {
   SerializableWrapper,
   SerializeOptions,
 } from '.';
+import {toJSON} from './utils';
 
 /** Serializable record where props are defined via @field. */
 export class SObject extends Serializable {
@@ -41,15 +43,13 @@ export class SObject extends Serializable {
   }
 
   toJSON(): any {
-    const values = this.wrapSArrayErrorAsSObjectError(() =>
-      this.toSArray().toJSON()
-    );
-    return fromPairs(
-      getSObjectFieldSpecs(this).map(({propertyKey}, i) => [
-        propertyKey,
-        values[i],
-      ])
-    );
+    return mapValues(this.mapValuesToSerializable(), (value, propertyKey) => {
+      try {
+        return toJSON(value);
+      } catch (e: any) {
+        throw new SObjectError(propertyKey, e);
+      }
+    });
   }
 
   /** Create a new instance with the provided initial properties. */
@@ -59,9 +59,27 @@ export class SObject extends Serializable {
     return instance;
   }
 
-  /** Converts this object to an SArray<Serializable>. */
-  private toSArray() {
-    return SArray.of(getAllSObjectFieldsOrWrappers(this));
+  /** Create a object where all properties are mapped to Serializable.
+   *
+   * Fields defined with @field are preserved as-is, and field defined with
+   * @field.as are wrapped in their respective wrapper types.
+   */
+  public mapValuesToSerializable(): {[propertyKey: string]: Serializable} {
+    return fromPairs(
+      getSObjectFieldSpecs(this).map((fieldSpec) => [
+        fieldSpec.propertyKey,
+        getSObjectFieldOrWrapper(this, fieldSpec),
+      ])
+    );
+  }
+
+  /** Converts this object to an SArray of serializable field values. */
+  private toSArray(): SArray<Serializable> {
+    return SArray.of(
+      getSObjectFieldSpecs(this).map((fieldSpec) =>
+        getSObjectFieldOrWrapper(this, fieldSpec)
+      )
+    );
   }
 
   private wrapSArrayErrorAsSObjectError<FnT extends () => any>(
@@ -71,16 +89,11 @@ export class SObject extends Serializable {
       return fn();
     } catch (e) {
       if (e instanceof SArrayError) {
-        const propertyKey: string =
+        const propertyKey =
           getSObjectFieldSpecs(this)[e.index].propertyKey.toString();
         // @ts-ignore
         const cause: Error = e.cause;
-        const e2 = new SObjectError(
-          `Error in field ${propertyKey}: ${cause.message}`,
-          {cause}
-        );
-        e2.stack = e.stack;
-        e2.propertyKey = propertyKey;
+        const e2 = new SObjectError(propertyKey, cause);
         throw e2;
       } else {
         throw e;
@@ -91,15 +104,17 @@ export class SObject extends Serializable {
 
 /** Error augmented by SObject with property information. */
 export class SObjectError extends Error {
-  constructor(message: string, {cause}: {cause: Error}) {
-    super(message);
+  constructor(propertyKey: string, cause: any) {
+    super(`Error in field ${propertyKey}: ${cause.message}`);
     Object.setPrototypeOf(this, SObjectError.prototype);
     this.cause = cause;
+    this.propertyKey = propertyKey;
+    this.stack = cause.stack;
   }
   /** The original error. */
-  cause: Error;
+  cause: any;
   /** The property that raised the error. */
-  propertyKey!: string;
+  propertyKey: string;
 }
 
 /** Decorator for Serializable fields of an SObject. */
@@ -174,11 +189,4 @@ function getSObjectFieldOrWrapper(
   } else {
     return value as Serializable;
   }
-}
-
-/** Get Serializable values corresponding to all the fields of an SObject. */
-function getAllSObjectFieldsOrWrappers(targetInstance: Object) {
-  return getSObjectFieldSpecs(targetInstance).map((fieldSpec) =>
-    getSObjectFieldOrWrapper(targetInstance, fieldSpec)
-  );
 }
