@@ -77,7 +77,7 @@ export abstract class SBitmask extends SerializableWrapper<number> {
     return wrapper.getSerializedLength(opts);
   }
 
-  toJSON() {
+  toJSON(): any {
     return fromPairs(
       getSBitfieldSpecs(this).map(({propertyKey}) => [
         propertyKey,

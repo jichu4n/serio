@@ -40,7 +40,7 @@ export class SObject extends Serializable {
     );
   }
 
-  toJSON() {
+  toJSON(): any {
     const values = this.wrapSArrayErrorAsSObjectError(() =>
       this.toSArray().toJSON()
     );

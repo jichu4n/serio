@@ -32,7 +32,7 @@ export class SArray<
     return sum(this.map((element) => element.getSerializedLength(opts)));
   }
 
-  toJSON() {
+  toJSON(): any {
     return this.map(toJSON);
   }
 
