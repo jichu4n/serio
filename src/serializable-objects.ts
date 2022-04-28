@@ -59,18 +59,48 @@ export class SObject extends Serializable {
     return instance;
   }
 
-  /** Create a object where all properties are mapped to Serializable.
+  /** Map values of this object to Serializable.
    *
    * Fields defined with @field are preserved as-is, and field defined with
    * @field.as are wrapped in their respective wrapper types.
    */
-  public mapValuesToSerializable(): {[propertyKey: string]: Serializable} {
+  mapValuesToSerializable(): {[propertyKey: string]: Serializable} {
     return fromPairs(
       getSObjectFieldSpecs(this).map((fieldSpec) => [
         fieldSpec.propertyKey,
         getSObjectFieldOrWrapper(this, fieldSpec),
       ])
     );
+  }
+
+  /** Assign properties to this object from a map of Serializables.
+   *
+   * Conceptually equivalent to Object.assign(), but automatically unwraps
+   * wrapped properties. Fields defined with @field are directly assigned, and
+   * fields defined with @field.as are assigned by unwrapping the corresponding
+   * SerializableWrapper. Unknown fields are ignored.
+   */
+  assignFromSerializable(serializableMap: {
+    [propertyKey: string]: Serializable;
+  }) {
+    for (const {propertyKey, wrapperType} of getSObjectFieldSpecs(this)) {
+      const serializableValue = serializableMap[propertyKey.toString()];
+      if (!serializableValue) {
+        continue;
+      }
+      if (wrapperType) {
+        if (!(serializableValue instanceof SerializableWrapper)) {
+          throw new Error(
+            `Error in field ${propertyKey.toString()}: ` +
+              `expected SerializableWrapper in assignment, ` +
+              `got ${typeof serializableValue} (${toJSON(serializableValue)})`
+          );
+        }
+        (this as any)[propertyKey] = serializableValue.value;
+      } else {
+        (this as any)[propertyKey] = serializableValue;
+      }
+    }
   }
 
   /** Converts this object to an SArray of serializable field values. */
