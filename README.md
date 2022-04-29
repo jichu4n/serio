@@ -131,6 +131,27 @@ The full list of provided integer types:
 | [`SUInt32BE`](https://jichu4n.github.io/serio/classes/SUInt32BE.html) |      4       | Unsigned |  Big endian   |
 |  [`SInt32BE`](https://jichu4n.github.io/serio/classes/SInt32BE.html)  |      4       |  Signed  |  Big endian   |
 
+## Enums
+
+All of the integer wrappers above also support looking up an enum label for
+JSON-ification. For example:
+
+```ts
+enum MyType {
+  FOO = 0,
+  BAR = 1,
+}
+JSON.stringify(SUInt8.of(0)); // => 0
+JSON.stringify(SUInt8.asEnum(MyType).of(0)); // => "FOO"
+
+class MyObject extends SObject {
+  @field.as(SUInt8.asEnum(MyType))
+  type = 0;
+}
+
+JSON.stringify(new MyObject()); // => {"type": "FOO"}
+```
+
 ## Strings
 
 serio provides the

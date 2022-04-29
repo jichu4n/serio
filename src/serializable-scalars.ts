@@ -95,6 +95,20 @@ export function createSerializableScalarWrapperClass<ValueT>({
   const SerializableScalarWrapperClass = class extends SerializableWrapper<ValueT> {
     value: ValueT = defaultValue;
 
+    /** Return a variant of this class that looks up an enum value for toJSON(). */
+    static asEnum(enumType: Object) {
+      return class extends createSerializableScalarWrapperClass<ValueT>({
+        readFn,
+        writeFn,
+        serializedLength,
+        defaultValue,
+      }) {
+        toJSON() {
+          return (enumType as any)[this.value];
+        }
+      };
+    }
+
     deserialize(buffer: Buffer) {
       this.value = readFn.call(buffer);
       return serializedLength;
