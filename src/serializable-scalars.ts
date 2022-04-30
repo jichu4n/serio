@@ -104,7 +104,7 @@ export function createSerializableScalarWrapperClass<ValueT>({
         defaultValue,
       }) {
         toJSON() {
-          return (enumType as any)[this.value];
+          return (enumType as any)[this.value] ?? this.value;
         }
       };
     }
