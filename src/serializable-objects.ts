@@ -1,6 +1,5 @@
 import fromPairs from 'lodash/fromPairs';
 import mapValues from 'lodash/mapValues';
-import 'reflect-metadata';
 import {
   DeserializeOptions,
   SArray,
@@ -147,50 +146,75 @@ export class SObjectError extends Error {
   propertyKey: string;
 }
 
+type SerializableFieldDecorator<ValueT> = {
+  (
+    value: Function,
+    context: ClassGetterDecoratorContext | ClassSetterDecoratorContext
+  ): void;
+  (value: undefined, context: ClassFieldDecoratorContext): (
+    initialValue: ValueT
+  ) => ValueT;
+};
+
 /** Decorator for Serializable fields of an SObject. */
-export function field<ValueT>(target: any, propertyKey: string | symbol) {
-  registerSObjectField(target, propertyKey);
-}
-export namespace field {
-  /** Decorator for fields to be wrapped in a Serializable wrapper class. */
-  export function as<ValueT>(
-    wrapperType: new () => SerializableWrapper<ValueT>
-  ): PropertyDecorator {
-    return function (target: Object, propertyKey: string | symbol) {
-      registerSObjectField(target, propertyKey, wrapperType);
-    };
-  }
+export function field<ValueT>(
+  wrapperType?: new () => SerializableWrapper<ValueT>
+) {
+  return function (
+    value: undefined | Function,
+    context:
+      | ClassFieldDecoratorContext
+      | ClassGetterDecoratorContext
+      | ClassSetterDecoratorContext
+  ) {
+    context.addInitializer(function () {
+      registerSObjectField(this, context.name, wrapperType);
+    });
+    switch (context.kind) {
+      case 'field':
+        return (initialValue: ValueT) => initialValue;
+      case 'getter':
+      case 'setter':
+        return;
+      default:
+        throw new Error('@field() should only be used on class properties');
+    }
+  } as SerializableFieldDecorator<ValueT>;
 }
 
-/** Key for storing property information on an SObject's metadata. */
-const SOBJECT_FIELD_SPECS_METADATA_KEY = Symbol('__sobjectFieldSpecs');
+/** Key for metadata stored on an SObject's prototype. */
+const SOBJECT_METADATA_KEY = Symbol('__sobjectMetadata');
 
 /** Registers a serializable property in the metadata of an SObject. */
 function registerSObjectField<ValueT>(
-  target: any,
+  targetInstance: any,
   propertyKey: string | symbol,
   wrapperType?: new () => SerializableWrapper<ValueT>
 ) {
-  const fieldSpecs = Reflect.getMetadata(
-    SOBJECT_FIELD_SPECS_METADATA_KEY,
-    target
-  ) as Array<SObjectFieldSpec> | undefined;
-  const fieldSpec: SObjectFieldSpec = {
+  const targetPrototype = Object.getPrototypeOf(targetInstance);
+  const metadata = targetPrototype[SOBJECT_METADATA_KEY] as
+    | SObjectMetadata
+    | undefined;
+  const fieldSpec: SObjectFieldSpec<ValueT> = {
     propertyKey,
     wrapperType,
   };
-  if (fieldSpecs) {
-    fieldSpecs.push(fieldSpec);
+  if (metadata) {
+    if (metadata.propertyKeys.has(propertyKey)) {
+      return;
+    }
+    metadata.propertyKeys.add(propertyKey);
+    metadata.fieldSpecs.push(fieldSpec);
   } else {
-    Reflect.defineMetadata(
-      SOBJECT_FIELD_SPECS_METADATA_KEY,
-      [fieldSpec],
-      target
-    );
+    const newMetadata: SObjectMetadata = {
+      fieldSpecs: [fieldSpec],
+      propertyKeys: new Set<string | symbol>([propertyKey]),
+    };
+    targetPrototype[SOBJECT_METADATA_KEY] = newMetadata;
   }
 }
 
-/** Metadata stored for each serializable property on an SObject's metadata. */
+/** Metadata stored for each serializable property on an SObject's prototype. */
 interface SObjectFieldSpec<ValueT = any> {
   /** The name of the property. */
   propertyKey: string | symbol;
@@ -198,12 +222,23 @@ interface SObjectFieldSpec<ValueT = any> {
   wrapperType?: new () => SerializableWrapper<ValueT>;
 }
 
+/** Metadata stored on an SObject's prototype. */
+interface SObjectMetadata {
+  /** List of serializable fields, in declaration order. */
+  fieldSpecs: Array<SObjectFieldSpec>;
+  /** Name of all serializable fields as a set. */
+  propertyKeys: Set<string | symbol>;
+}
+
 /** Extract SObjectFieldSpec's defined on a SObject. */
 function getSObjectFieldSpecs(targetInstance: Object) {
-  return (Reflect.getMetadata(
-    SOBJECT_FIELD_SPECS_METADATA_KEY,
-    Object.getPrototypeOf(targetInstance)
-  ) ?? []) as Array<SObjectFieldSpec>;
+  return (
+    (
+      Object.getPrototypeOf(targetInstance)[SOBJECT_METADATA_KEY] as
+        | SObjectMetadata
+        | undefined
+    )?.fieldSpecs ?? []
+  );
 }
 
 /** Get the Serializable value corresponding to an SObject field. */
