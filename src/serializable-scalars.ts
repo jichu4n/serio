@@ -96,7 +96,7 @@ export function createSerializableScalarWrapperClass<ValueT>({
     value: ValueT = defaultValue;
 
     /** Return a variant of this class that looks up an enum value for toJSON(). */
-    static asEnum(enumType: Object) {
+    static enum(enumType: Object) {
       return class extends createSerializableScalarWrapperClass<ValueT>({
         readFn,
         writeFn,

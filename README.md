@@ -141,11 +141,11 @@ enum MyType {
   BAR = 1,
 }
 JSON.stringify(SUInt8.of(0)); // => 0
-JSON.stringify(SUInt8.asEnum(MyType).of(0)); // => "FOO"
+JSON.stringify(SUInt8.enum(MyType).of(0)); // => "FOO"
 
 class MyObject extends SObject {
-  @field(SUInt8.asEnum(MyType))
-  type = 0;
+  @field(SUInt8.enum(MyType))
+  type = MyType.FOO;
 }
 
 JSON.stringify(new MyObject()); // => {"type": "FOO"}

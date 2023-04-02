@@ -25,7 +25,7 @@ class TestObjectA extends SObject {
   @field(SString.ofLength(4))
   prop3 = '';
 
-  @field(SUInt8.asEnum(TestEnum))
+  @field(SUInt8.enum(TestEnum))
   prop4 = TestEnum.ZERO;
 }
 
