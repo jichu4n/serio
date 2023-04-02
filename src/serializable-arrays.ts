@@ -57,7 +57,7 @@ export class SArray<
    * SerializableWrapper. */
   static of<WrapperT extends SerializableWrapper<any>>(
     wrapperType: new () => WrapperT
-  ): ReturnType<typeof createSArrayWithWrapperClass>;
+  ): ReturnType<typeof createSArrayWithWrapperClass<WrapperT>>;
   static of<ValueT, WrapperT extends SerializableWrapper<ValueT>>(
     valueOrWrapperType: Array<ValueT> | (new () => WrapperT)
   ) {

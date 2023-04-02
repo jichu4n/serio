@@ -10,7 +10,7 @@ import {
 } from '.';
 import {toJSON} from './utils';
 
-/** Serializable record where props are defined via @field. */
+/** Serializable record where fields are defined via `@field()`. */
 export class SObject extends Serializable {
   deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
     const array = this.toSArray();
