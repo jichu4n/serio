@@ -15,19 +15,17 @@ serialize and deserialize to binary formats.
 npm install --save serio
 ```
 
-Make sure to enable the following settings in your `tsconfig.json`:
+Requirements:
 
-```json
-"experimentalDecorators": true,
-"emitDecoratorMetadata": true,
-```
+1. TypeScript 5.0 or higher;
+2. The `experimentalDecorators` setting should NOT be enabled in `tsconfig.json`.
 
 ### Basic usage
 
 ```ts
 import {SObject, SUInt32LE, field} from serio;
 
-/** A class that maps to the following C struct:
+/** An object that maps to the following C struct:
  *
  *     struct Position {
  *         uint32_t x;
@@ -35,12 +33,13 @@ import {SObject, SUInt32LE, field} from serio;
  *     };
  */
 class Position extends SObject {
-  @field.as(SUInt32LE)
+  @field(SUInt32LE)
   x = 0;
-  @field.as(SUInt32LE)
+  @field(SUInt32LE)
   y = 0;
 
-  // Properties without a decorator are ignored for serialization.
+  // Properties without the @field() decorator are ignored during serialization
+  // and deserialization.
   foo = 100;
 }
 
@@ -145,7 +144,7 @@ JSON.stringify(SUInt8.of(0)); // => 0
 JSON.stringify(SUInt8.asEnum(MyType).of(0)); // => "FOO"
 
 class MyObject extends SObject {
-  @field.as(SUInt8.asEnum(MyType))
+  @field(SUInt8.asEnum(MyType))
   type = 0;
 }
 
@@ -340,9 +339,9 @@ To define a serializable object:
    `class X extends SObject`.
 2. Use the following decorators to annotate class properties that should be
    serialized / deserialized:
-   - [`@field prop = X;`](https://jichu4n.github.io/serio/modules.html#field) if the
+   - [`@field() prop = X;`](https://jichu4n.github.io/serio/modules.html#field) if the
      property is itself a `Serializable`, such as another object;
-   - [`@field.as(WrapperClass) prop = X;`](https://jichu4n.github.io/serio/modules/field.html#as) if the
+   - [`@field(WrapperClass) prop = X;`](https://jichu4n.github.io/serio/modules/field.html#as) if the
      property should be wrapped with a `Serializable` wrapper, such as an
      integer or a string.
 
@@ -360,10 +359,10 @@ class Position extends SObject {
   // This will wrap x using SUInt32LE for serialization / deserialization
   // behind the scenes, but allows it to be manipulated as a normal class
   // property of type number.
-  @field.as(SUInt32LE)
+  @field(SUInt32LE)
   x = 0;
 
-  @field.as(SUInt32LE)
+  @field(SUInt32LE)
   y = 0;
 
   // Properties without a decorator are ignored for serialization.
@@ -392,7 +391,7 @@ const size = pos1.getSerializedLength();  // => 8
 const bytesRead = pos1.deserialize(buffer.slice(...));  // => 8
 ```
 
-A more advanced example showing nesting, `@field`, and wrapping getter / setters:
+A more advanced example showing nesting, `@field()`, and wrapping getter / setters:
 
 ```ts
 /** A class that maps to the following C struct:
@@ -407,9 +406,9 @@ A more advanced example showing nesting, `@field`, and wrapping getter / setters
  *  https://en.wikipedia.org/wiki/8-bit_color).
  */
 class Point {
-  // Since Position is itself a Serializable object, we use @field instead
-  // of @field.as.
-  @field
+  // Since Position is itself a Serializable object, we use @field() with
+  // no arguments.
+  @field()
   position = new Position();
 
   // We expose red, green and blue component values as separate properties to
@@ -418,10 +417,10 @@ class Point {
   green = 0;
   blue = 0;
 
-  // We use @field.as to decorate our getter / setter for `color`, which
+  // We use @field() to decorate our getter / setter for `color`, which
   // encodes red / green / blue components as an 8-bit color value in the
   // format RRR GGG BB.
-  @field.as(SUInt8)
+  @field(SUInt8)
   get color() {
     return (
       ((this.red & 0x07) << 5) | (this.green & (0x07 << 2)) | (this.blue & 0x03)
@@ -433,7 +432,7 @@ class Point {
     this.blue = v & 0x03;
   }
 
-  @field.as(SStringNT.ofLength(31))
+  @field(SStringNT.ofLength(31))
   label = '';
 }
 
@@ -448,17 +447,17 @@ Example combining objects and arrays:
 ```ts
 class ExampleObject extends SObject {
   // Equivalent C: Point[10]
-  @field.as(SArray)
+  @field(SArray)
   prop1 = Array(10)
     .fill()
     .map(() => new Point());
 
   // Equivalent C: uint8_t[10]
-  @field.as(SArray.as(SUInt8))
+  @field(SArray.as(SUInt8))
   prop2 = Array(10).fill(0);
 
   // Equivalent C: char[2][2][10]
-  @field.as(SArray.as(SArray.as(SStringNT.ofLength(10))))
+  @field(SArray.as(SArray.as(SStringNT.ofLength(10))))
   prop3 = [
     ['hello', 'world'],
     ['foo', 'bar'],
@@ -518,9 +517,9 @@ Boolean flags are also supported:
 
 ```ts
 class MyBitmask extends SBitmask.as(SUInt8) {
-  @bitfield(1, Boolean)
+  @bitfield(1)
   flag1 = false;
-  @bitfield(2, Boolean)
+  @bitfield(2)
   flag2 = false;
   @bitfield(6)
   unused = 0;
@@ -575,12 +574,12 @@ const obj2 = MyType.from(buffer);
 // MyType can be used together with SArray, SObject etc:
 const arr1 = SArray.of([new MyType(), new MyType()]);
 class SomeObject extends SObject {
-  @field
+  @field()
   myType = new MyType();
 }
 ```
 
-To define a class that wraps a raw value, to be used with `@field.as()` and
+To define a class that wraps a raw value, to be used with `@field()` and
 `SArray.as()`, you can instead extend the
 [`SerializableWrapper`](https://jichu4n.github.io/serio/classes/SerializableWrapper.html)
 class:
@@ -609,10 +608,10 @@ const obj1 = new MyWrapperType();
 const obj2 = MyWrapperType.from(buffer);
 const obj3 = MyWrapperType.of(42);
 
-// MyWrapperType can be used with `SArray.as()` and `@field.as`:
+// MyWrapperType can be used with `SArray.as()` and `@field()`:
 const arr1 = SArray.as(MyWrapperType).of([1, 2, 3]);
 class SomeObject extends SObject {
-  @field.as(MyWrapperType)
+  @field(MyWrapperType)
   foo: number = 0;
 }
 ```

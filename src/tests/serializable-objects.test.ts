@@ -14,18 +14,18 @@ enum TestEnum {
   ONE = 1,
 }
 
-/** Example object that exercises `field` and `field.as`. */
+/** Example object that exercises `field()`. */
 class TestObjectA extends SObject {
-  @field
+  @field()
   prop1 = new SUInt8();
 
-  @field.as(SUInt16BE)
+  @field(SUInt16BE)
   prop2 = 0;
 
-  @field.as(SString.ofLength(4))
+  @field(SString.ofLength(4))
   prop3 = '';
 
-  @field.as(SUInt8.asEnum(TestEnum))
+  @field(SUInt8.asEnum(TestEnum))
   prop4 = TestEnum.ZERO;
 }
 
@@ -36,7 +36,7 @@ class TestObjectB extends SObject {
   firstName: string = '';
   lastName: string = '';
 
-  @field
+  @field()
   get fullName(): SStringNT {
     return SStringNT.of(`${this.firstName} ${this.lastName}`);
   }
@@ -45,12 +45,12 @@ class TestObjectB extends SObject {
   }
 }
 
-/** Example object that tests field.as with accessors. */
+/** Example object that tests `field()` with accessors. */
 class TestObjectC extends SObject {
   firstName: string = '';
   lastName: string = '';
 
-  @field.as(SStringNT)
+  @field(SStringNT)
   get fullName() {
     return `${this.firstName} ${this.lastName}`;
   }
@@ -65,10 +65,10 @@ class ThrowingObject extends SObject {
     super();
   }
 
-  @field.as(SUInt16BE)
+  @field(SUInt16BE)
   prop1 = 0;
 
-  @field
+  @field()
   prop2 = new ThrowingSerializable(this.errorMessage);
 }
 

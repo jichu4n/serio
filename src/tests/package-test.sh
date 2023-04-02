@@ -10,7 +10,7 @@ import assert from 'assert';
 import {SUInt8, SArray, SObject, field} from 'serio';
 
 class MyObject extends SObject {
-  @field.as(SArray.as(SUInt8))
+  @field(SArray.as(SUInt8))
 	prop1: Array<number> = Array(10).fill(0);
 }
 
