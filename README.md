@@ -141,11 +141,11 @@ enum MyType {
   BAR = 1,
 }
 JSON.stringify(SUInt8.of(0)); // => 0
-JSON.stringify(SUInt8.asEnum(MyType).of(0)); // => "FOO"
+JSON.stringify(SUInt8.enum(MyType).of(0)); // => "FOO"
 
 class MyObject extends SObject {
-  @field(SUInt8.asEnum(MyType))
-  type = 0;
+  @field(SUInt8.enum(MyType))
+  type = MyType.FOO;
 }
 
 JSON.stringify(new MyObject()); // => {"type": "FOO"}
@@ -289,26 +289,26 @@ arr1.deserialize(buffer);
 const size = arr1.getSerializedLength();
 ```
 
-`SArray` can also be combined with wrappers such as `SUInt32LE` and `SStringNT`
-to make it easier to work with arrays of numbers, strings or other raw values.
-Since `SArray` is itself a wrapper class for arrays, This mechanism also makes
-it easy to work with multi-dimensional arrays. For example:
+To wrap arrays of numbers, strings, and other raw values, `SArray` can be
+combined with wrapper classes such as `SUInt32LE` and `SStringNT` using
+`SArray.of(wrapperClass)`. To wrap multi-dimensional arrays, multiple levels of
+`SArray`s can be created using `SArray.of(SArray.of(...))`. For example:
 
 ```ts
 // Create an SArray equivalent to uint8_t[5], initialized to 0.
-const arr1 = SArray.as(SUInt8).ofLength(5, 0);
+const arr1 = SArray.of(SUInt8).ofLength(5, 0);
 console.log(arr1.value); // [0, 0, 0, 0, 0]
 
 // Create an SArray equivalent to uint8_t[5], with initial values.
-const arr2 = SArray.as(SUInt8).ofLength(5, (idx) => idx);
+const arr2 = SArray.of(SUInt8).ofLength(5, (idx) => idx);
 console.log(arr2.value); // [0, 1, 2, 3, 4]
 
 // Create an SArray of strings from an existing array:
-const arr3 = SArray.as(SStringNT.ofLength(10)).of(['hello', 'foo', 'bar']);
+const arr3 = SArray.of(SStringNT.ofLength(10)).of(['hello', 'foo', 'bar']);
 console.log(arr3.value); // 'hello', 'foo', 'bar'
 
-// Create a 3x3 2-D SArray:
-const arr4 = SArray.as(SArray.as(SUInt8)).of([
+// Create a 3x3 2D SArray:
+const arr4 = SArray.of(SArray.of(SUInt8)).of([
   [0, 0, 0],
   [1, 1, 1],
   [2, 2, 2],
@@ -316,7 +316,7 @@ const arr4 = SArray.as(SArray.as(SUInt8)).of([
 console.log(arr4.value[2][0]); // => 2
 
 // Serialization / deserialization options are passed through to contained elements.
-const arr5 = SArray.as(SStringNT).of(['你好', '世界']);
+const arr5 = SArray.of(SStringNT).of(['你好', '世界']);
 console.log([
   arr5.getSerializedLength(), // => 14
   arr5.getSerializedLength({encoding: 'gb2312'}), // 10
@@ -337,13 +337,13 @@ To define a serializable object:
 1. Create a TypeScript class that derives from
    [`SObject`](https://jichu4n.github.io/serio/classes/SObject.html), i.e.
    `class X extends SObject`.
-2. Use the following decorators to annotate class properties that should be
-   serialized / deserialized:
-   - [`@field() prop = X;`](https://jichu4n.github.io/serio/modules.html#field) if the
-     property is itself a `Serializable`, such as another object;
-   - [`@field(WrapperClass) prop = X;`](https://jichu4n.github.io/serio/modules/field.html#as) if the
-     property should be wrapped with a `Serializable` wrapper, such as an
-     integer or a string.
+2. Use the [`@field()`
+   decorator](https://jichu4n.github.io/serio/functions/field.html) to annotate
+   class properties that should be serialized / deserialized:
+   - `@field() prop = X;` if the property is itself a `Serializable`, such as
+     another object;
+   - `@field(WrapperClass) prop = X;` if the property should be wrapped with a
+     `Serializable` wrapper, such as an integer or a string.
 
 Basic example:
 
@@ -453,11 +453,11 @@ class ExampleObject extends SObject {
     .map(() => new Point());
 
   // Equivalent C: uint8_t[10]
-  @field(SArray.as(SUInt8))
+  @field(SArray.of(SUInt8))
   prop2 = Array(10).fill(0);
 
   // Equivalent C: char[2][2][10]
-  @field(SArray.as(SArray.as(SStringNT.ofLength(10))))
+  @field(SArray.of(SArray.of(SStringNT.ofLength(10))))
   prop3 = [
     ['hello', 'world'],
     ['foo', 'bar'],
@@ -480,10 +480,10 @@ interface is similar to `SObject`. Example usage:
 /** An 8-bit color in the format RRR GG BB (see
  * https://en.wikipedia.org/wiki/8-bit_color).
  *
- * SBitmask.as(wrapper type) produces a base class that serializes
+ * SBitmask.of(wrapperClass) produces a base class that serializes
  * to the specified length.
  */
-class Color8Bit extends SBitmask.as(SUInt8) {
+class Color8Bit extends SBitmask.of(SUInt8) {
   // @bitfield(number of bits) is used to annotate the fields that go into the
   // bitmask, from most significant to least significant.
   @bitfield(3)
@@ -516,7 +516,7 @@ console.log(c3.toJSON()); // => {r: 7, g: 0, b: 2}
 Boolean flags are also supported:
 
 ```ts
-class MyBitmask extends SBitmask.as(SUInt8) {
+class MyBitmask extends SBitmask.of(SUInt8) {
   @bitfield(1)
   flag1 = false;
   @bitfield(2)
@@ -580,7 +580,7 @@ class SomeObject extends SObject {
 ```
 
 To define a class that wraps a raw value, to be used with `@field()` and
-`SArray.as()`, you can instead extend the
+`SArray.of()`, you can instead extend the
 [`SerializableWrapper`](https://jichu4n.github.io/serio/classes/SerializableWrapper.html)
 class:
 
@@ -608,8 +608,8 @@ const obj1 = new MyWrapperType();
 const obj2 = MyWrapperType.from(buffer);
 const obj3 = MyWrapperType.of(42);
 
-// MyWrapperType can be used with `SArray.as()` and `@field()`:
-const arr1 = SArray.as(MyWrapperType).of([1, 2, 3]);
+// MyWrapperType can be used with `SArray.of()` and `@field()`:
+const arr1 = SArray.of(MyWrapperType).of([1, 2, 3]);
 class SomeObject extends SObject {
   @field(MyWrapperType)
   foo: number = 0;

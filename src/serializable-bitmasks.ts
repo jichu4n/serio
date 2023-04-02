@@ -5,14 +5,32 @@ import {DeserializeOptions, SerializeOptions} from './serializable';
 
 /** A numeric value that represents a bitmask of several fields.*/
 export abstract class SBitmask extends SerializableWrapper<number> {
+  /** Create a new instance of this wrapper class from a raw value. */
+  static of<SBitmaskT extends SBitmask>(
+    this: new () => SBitmaskT,
+    value: number
+  ): SBitmaskT;
   /** Returns an SBitmask class that serializes using the provided
    * SerializableWrapper. */
-  static as<WrapperT extends SerializableWrapper<number>>(
+  static of<WrapperT extends SerializableWrapper<number>>(
     wrapperType: new () => WrapperT
+  ): ReturnType<typeof createSBitmaskClass<WrapperT>>;
+  static of<WrapperT extends SerializableWrapper<number>>(
+    valueOrWrapperType: number | (new () => WrapperT)
   ) {
-    return class extends SBitmask {
-      wrapperType = wrapperType;
-    };
+    if (typeof valueOrWrapperType === 'number') {
+      return super.of(valueOrWrapperType);
+    }
+    if (
+      typeof valueOrWrapperType === 'function' &&
+      valueOrWrapperType.prototype instanceof SerializableWrapper
+    ) {
+      return createSBitmaskClass(valueOrWrapperType);
+    }
+    throw new Error(
+      'SBitmask.of() should be invoked either with a number value ' +
+        'or a SerializableWrapper<number> constructor'
+    );
   }
 
   /** Create a new instance with the provided initial properties. */
@@ -86,6 +104,14 @@ export abstract class SBitmask extends SerializableWrapper<number> {
       ])
     );
   }
+}
+
+function createSBitmaskClass<WrapperT extends SerializableWrapper<number>>(
+  wrapperType: new () => WrapperT
+) {
+  return class extends SBitmask {
+    wrapperType = wrapperType;
+  };
 }
 
 type BitfieldDecorator<ValueT> = {
