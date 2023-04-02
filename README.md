@@ -289,11 +289,10 @@ arr1.deserialize(buffer);
 const size = arr1.getSerializedLength();
 ```
 
-`SArray` can be combined with wrappers such as `SUInt32LE` and `SStringNT` using
-`SArray.of(wrapperClass)` to wrap arrays of numbers, strings, etc. Since `SArray` is
-itself a wrapper for arrays, multiple levels of `SArray` can be combined
-together using `SArray.of(SArray.of(...))` to wrap multi-dimensional arrays. For
-example:
+To wrap arrays of numbers, strings, and other raw values, `SArray` can be
+combined with wrapper classes such as `SUInt32LE` and `SStringNT` using
+`SArray.of(wrapperClass)`. To wrap multi-dimensional arrays, multiple levels of
+`SArray`s can be created using `SArray.of(SArray.of(...))`. For example:
 
 ```ts
 // Create an SArray equivalent to uint8_t[5], initialized to 0.
@@ -308,7 +307,7 @@ console.log(arr2.value); // [0, 1, 2, 3, 4]
 const arr3 = SArray.of(SStringNT.ofLength(10)).of(['hello', 'foo', 'bar']);
 console.log(arr3.value); // 'hello', 'foo', 'bar'
 
-// Create a 3x3 2-D SArray:
+// Create a 3x3 2D SArray:
 const arr4 = SArray.of(SArray.of(SUInt8)).of([
   [0, 0, 0],
   [1, 1, 1],
@@ -338,13 +337,13 @@ To define a serializable object:
 1. Create a TypeScript class that derives from
    [`SObject`](https://jichu4n.github.io/serio/classes/SObject.html), i.e.
    `class X extends SObject`.
-2. Use the following decorators to annotate class properties that should be
-   serialized / deserialized:
-   - [`@field() prop = X;`](https://jichu4n.github.io/serio/modules.html#field) if the
-     property is itself a `Serializable`, such as another object;
-   - [`@field(WrapperClass) prop = X;`](https://jichu4n.github.io/serio/modules/field.html#as) if the
-     property should be wrapped with a `Serializable` wrapper, such as an
-     integer or a string.
+2. Use the [`@field()`
+   decorator](https://jichu4n.github.io/serio/functions/field.html) to annotate
+   class properties that should be serialized / deserialized:
+   - `@field() prop = X;` if the property is itself a `Serializable`, such as
+     another object;
+   - `@field(WrapperClass) prop = X;` if the property should be wrapped with a
+     `Serializable` wrapper, such as an integer or a string.
 
 Basic example:
 
