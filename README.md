@@ -15,18 +15,17 @@ serialize and deserialize to binary formats.
 npm install --save serio
 ```
 
-serio uses the ECMAScript-compatible decorator system introduced in TypeScript
-5.0, so please make sure that
+Requirements:
 
-1. You are using TypeScript 5.x or higher;
-2. The `experimentalDecorators` setting is NOT enabled in your `tsconfig.json`.
+1. TypeScript 5.0 or higher;
+2. The `experimentalDecorators` setting should NOT be enabled in `tsconfig.json`.
 
 ### Basic usage
 
 ```ts
 import {SObject, SUInt32LE, field} from serio;
 
-/** A class that maps to the following C struct:
+/** An object that maps to the following C struct:
  *
  *     struct Position {
  *         uint32_t x;
@@ -39,7 +38,8 @@ class Position extends SObject {
   @field(SUInt32LE)
   y = 0;
 
-  // Properties without a decorator are ignored for serialization.
+  // Properties without the @field() decorator are ignored during serialization
+  // and deserialization.
   foo = 100;
 }
 
