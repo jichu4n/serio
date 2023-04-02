@@ -3,13 +3,13 @@ import flatMap from 'lodash/flatMap';
 import {SArray, SObject, SUInt16LE, field, SStringNT} from '..';
 
 class TestObjectA extends SObject {
-  @field(SArray.as(SUInt16LE))
+  @field(SArray.of(SUInt16LE))
   prop1 = times(10, () => 0);
 
-  @field(SArray.as(SArray.as(SUInt16LE)))
+  @field(SArray.of(SArray.of(SUInt16LE)))
   prop2 = times(10, () => times(10, () => 0));
 
-  @field(SArray.as(SStringNT.ofLength(5)))
+  @field(SArray.of(SStringNT.ofLength(5)))
   prop3 = times(10, () => '');
 }
 const TEST_OBJECT_A_SIZE = 10 * 2 + 10 * 10 * 2 + 10 * 5;

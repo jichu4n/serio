@@ -13,7 +13,7 @@ export abstract class SerializableWrapper<ValueT> extends Serializable {
   static of<ValueT, WrapperT extends SerializableWrapper<ValueT>>(
     this: new () => WrapperT,
     value: ValueT
-  ) {
+  ): WrapperT {
     const instance = new this();
     instance.value = value;
     return instance;

@@ -289,26 +289,27 @@ arr1.deserialize(buffer);
 const size = arr1.getSerializedLength();
 ```
 
-`SArray` can also be combined with wrappers such as `SUInt32LE` and `SStringNT`
-to make it easier to work with arrays of numbers, strings or other raw values.
-Since `SArray` is itself a wrapper class for arrays, This mechanism also makes
-it easy to work with multi-dimensional arrays. For example:
+`SArray` can be combined with wrappers such as `SUInt32LE` and `SStringNT` using
+`SArray.of(wrapper)` to wrap arrays of numbers, strings, etc. Since `SArray` is
+itself a wrapper for arrays, multiple levels of `SArray` can be combined
+together using `SArray.of(SArray.of(...))` to wrap multi-dimensional arrays. For
+example:
 
 ```ts
 // Create an SArray equivalent to uint8_t[5], initialized to 0.
-const arr1 = SArray.as(SUInt8).ofLength(5, 0);
+const arr1 = SArray.of(SUInt8).ofLength(5, 0);
 console.log(arr1.value); // [0, 0, 0, 0, 0]
 
 // Create an SArray equivalent to uint8_t[5], with initial values.
-const arr2 = SArray.as(SUInt8).ofLength(5, (idx) => idx);
+const arr2 = SArray.of(SUInt8).ofLength(5, (idx) => idx);
 console.log(arr2.value); // [0, 1, 2, 3, 4]
 
 // Create an SArray of strings from an existing array:
-const arr3 = SArray.as(SStringNT.ofLength(10)).of(['hello', 'foo', 'bar']);
+const arr3 = SArray.of(SStringNT.ofLength(10)).of(['hello', 'foo', 'bar']);
 console.log(arr3.value); // 'hello', 'foo', 'bar'
 
 // Create a 3x3 2-D SArray:
-const arr4 = SArray.as(SArray.as(SUInt8)).of([
+const arr4 = SArray.of(SArray.of(SUInt8)).of([
   [0, 0, 0],
   [1, 1, 1],
   [2, 2, 2],
@@ -316,7 +317,7 @@ const arr4 = SArray.as(SArray.as(SUInt8)).of([
 console.log(arr4.value[2][0]); // => 2
 
 // Serialization / deserialization options are passed through to contained elements.
-const arr5 = SArray.as(SStringNT).of(['你好', '世界']);
+const arr5 = SArray.of(SStringNT).of(['你好', '世界']);
 console.log([
   arr5.getSerializedLength(), // => 14
   arr5.getSerializedLength({encoding: 'gb2312'}), // 10
@@ -453,11 +454,11 @@ class ExampleObject extends SObject {
     .map(() => new Point());
 
   // Equivalent C: uint8_t[10]
-  @field(SArray.as(SUInt8))
+  @field(SArray.of(SUInt8))
   prop2 = Array(10).fill(0);
 
   // Equivalent C: char[2][2][10]
-  @field(SArray.as(SArray.as(SStringNT.ofLength(10))))
+  @field(SArray.of(SArray.of(SStringNT.ofLength(10))))
   prop3 = [
     ['hello', 'world'],
     ['foo', 'bar'],
@@ -580,7 +581,7 @@ class SomeObject extends SObject {
 ```
 
 To define a class that wraps a raw value, to be used with `@field()` and
-`SArray.as()`, you can instead extend the
+`SArray.of()`, you can instead extend the
 [`SerializableWrapper`](https://jichu4n.github.io/serio/classes/SerializableWrapper.html)
 class:
 
@@ -608,8 +609,8 @@ const obj1 = new MyWrapperType();
 const obj2 = MyWrapperType.from(buffer);
 const obj3 = MyWrapperType.of(42);
 
-// MyWrapperType can be used with `SArray.as()` and `@field()`:
-const arr1 = SArray.as(MyWrapperType).of([1, 2, 3]);
+// MyWrapperType can be used with `SArray.of()` and `@field()`:
+const arr1 = SArray.of(MyWrapperType).of([1, 2, 3]);
 class SomeObject extends SObject {
   @field(MyWrapperType)
   foo: number = 0;

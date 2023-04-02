@@ -45,19 +45,35 @@ export class SArray<
     length: number,
     elementGenerator: (idx: number) => ValueT
   ): SArray<ValueT> {
-    return SArray.of<Array<ValueT>, SArray<ValueT>>(
-      times(length, elementGenerator)
-    );
+    return SArray.of(times(length, elementGenerator));
   }
 
+  /** Create a new instance of this wrapper class from a raw value. */
+  static of<ValueT extends Serializable, WrapperT extends SArray<ValueT>>(
+    this: new () => WrapperT,
+    value: Array<ValueT>
+  ): WrapperT;
   /** Returns an SArrayWithWrapper class that wraps elements with the provided
    * SerializableWrapper. */
-  static as<WrapperT extends SerializableWrapper<any>>(
+  static of<WrapperT extends SerializableWrapper<any>>(
     wrapperType: new () => WrapperT
+  ): ReturnType<typeof createSArrayWithWrapperClass>;
+  static of<ValueT, WrapperT extends SerializableWrapper<ValueT>>(
+    valueOrWrapperType: Array<ValueT> | (new () => WrapperT)
   ) {
-    return class extends SArrayWithWrapper<WrappedValueT<WrapperT>, WrapperT> {
-      wrapperType = wrapperType;
-    };
+    if (Array.isArray(valueOrWrapperType)) {
+      return super.of(valueOrWrapperType);
+    }
+    if (
+      typeof valueOrWrapperType === 'function' &&
+      valueOrWrapperType.prototype instanceof SerializableWrapper
+    ) {
+      return createSArrayWithWrapperClass(valueOrWrapperType);
+    }
+    throw new Error(
+      'SArray.of() should be invoked either with an array of Serializable ' +
+        'values or a SerializableWrapper constructor'
+    );
   }
 
   private map<FnT extends (element: ValueT, index: number) => any>(
@@ -82,6 +98,14 @@ export class SArray<
       }
     });
   }
+}
+
+function createSArrayWithWrapperClass<
+  WrapperT extends SerializableWrapper<any>
+>(wrapperType: new () => WrapperT) {
+  return class extends SArrayWithWrapper<WrappedValueT<WrapperT>, WrapperT> {
+    wrapperType = wrapperType;
+  };
 }
 
 /** SArray variant that wraps each element for serialization / deserialization.
