@@ -38,6 +38,8 @@ export abstract class SBitmask extends SerializableWrapper<number> {
     for (let i = bitfields.length - 1; i >= 0; --i) {
       const {propertyKey, length} = bitfields[i];
       const fieldMask = 2 ** length - 1;
+      // Checks the type of the property is valid.
+      getValueType(this, propertyKey);
       wrapper.value |= (((this as any)[propertyKey] | 0) & fieldMask) << offset;
       offset += length;
     }
@@ -50,11 +52,10 @@ export abstract class SBitmask extends SerializableWrapper<number> {
 
     let offset = 0;
     for (let i = bitfields.length - 1; i >= 0; --i) {
-      const {propertyKey, length, valueType} = bitfields[i];
+      const {propertyKey, length} = bitfields[i];
       const fieldMask = 2 ** length - 1;
-      (this as any)[propertyKey] = (valueType || Number)(
-        (newValue >> offset) & fieldMask
-      );
+      const valueType = getValueType(this, propertyKey);
+      (this as any)[propertyKey] = valueType((newValue >> offset) & fieldMask);
       offset += length;
     }
   }
@@ -87,28 +88,42 @@ export abstract class SBitmask extends SerializableWrapper<number> {
   }
 }
 
+type BitfieldDecorator<ValueT> = {
+  (
+    value: Function,
+    context: ClassGetterDecoratorContext | ClassSetterDecoratorContext
+  ): void;
+  (value: undefined, context: ClassFieldDecoratorContext): (
+    initialValue: ValueT
+  ) => ValueT;
+};
+
 /** Decorator for bitfields in an SBitmask. */
-export function bitfield(length: number, valueType?: SBitfieldValueType) {
-  return function (target: Object, propertyKey: string | symbol) {
-    const fieldSpecs = Reflect.getMetadata(
-      SBITFIELD_SPECS_METADATA_KEY,
-      target
-    ) as Array<SBitfieldSpec> | undefined;
-    const fieldSpec: SBitfieldSpec = {
-      propertyKey,
-      length,
-      valueType,
-    };
-    if (fieldSpecs) {
-      fieldSpecs.push(fieldSpec);
-    } else {
-      Reflect.defineMetadata(SBITFIELD_SPECS_METADATA_KEY, [fieldSpec], target);
+export function bitfield<ValueT extends number | boolean>(length: number) {
+  return function (
+    value: undefined | Function,
+    context:
+      | ClassFieldDecoratorContext
+      | ClassGetterDecoratorContext
+      | ClassSetterDecoratorContext
+  ) {
+    context.addInitializer(function () {
+      registerBitfield(this, context.name, length);
+    });
+    switch (context.kind) {
+      case 'field':
+        return (initialValue: ValueT) => initialValue;
+      case 'getter':
+      case 'setter':
+        return;
+      default:
+        throw new Error('@bitfield() should only be used on class properties');
     }
-  };
+  } as BitfieldDecorator<ValueT>;
 }
 
-/** Types that can be passed to @bitfield(). */
-type SBitfieldValueType = typeof Number | typeof Boolean;
+/** Key for storing field information on an SBitmask's metadata. */
+const SBITMASK_METADATA_KEY = Symbol('__sbitmaskMetadata');
 
 /** Metadata stored for each field on an SBitmask's metadata. */
 interface SBitfieldSpec {
@@ -116,19 +131,54 @@ interface SBitfieldSpec {
   propertyKey: string | symbol;
   /** Number of bits associated with this field. */
   length: number;
-  /** Value constructor. */
-  valueType?: SBitfieldValueType;
 }
 
-/** Key for storing field information on an SBitmask's metadata. */
-const SBITFIELD_SPECS_METADATA_KEY = Symbol('__sbitfieldSpecs');
+/** Metadata stored on an SBitmask's prototype. */
+interface SBitmaskMetadata {
+  /** List of bitfields, in declaration order. */
+  fieldSpecs: Array<SBitfieldSpec>;
+  /** Name of all bitfields as a set. */
+  propertyKeys: Set<string | symbol>;
+}
+
+/** Registers a bitfield in the metadata of an SBitmask. */
+function registerBitfield<ValueT>(
+  targetInstance: any,
+  propertyKey: string | symbol,
+  length: number
+) {
+  const targetPrototype = Object.getPrototypeOf(targetInstance);
+  const metadata = targetPrototype[SBITMASK_METADATA_KEY] as
+    | SBitmaskMetadata
+    | undefined;
+  const fieldSpec: SBitfieldSpec = {
+    propertyKey,
+    length,
+  };
+  if (metadata) {
+    if (metadata.propertyKeys.has(propertyKey)) {
+      return;
+    }
+    metadata.propertyKeys.add(propertyKey);
+    metadata.fieldSpecs.push(fieldSpec);
+  } else {
+    const newMetadata: SBitmaskMetadata = {
+      fieldSpecs: [fieldSpec],
+      propertyKeys: new Set<string | symbol>([propertyKey]),
+    };
+    targetPrototype[SBITMASK_METADATA_KEY] = newMetadata;
+  }
+}
 
 /** Extract SBitfieldSpec's defined on a SObject. */
-function getSBitfieldSpecs(targetInstance: Object) {
-  return (Reflect.getMetadata(
-    SBITFIELD_SPECS_METADATA_KEY,
-    Object.getPrototypeOf(targetInstance)
-  ) ?? []) as Array<SBitfieldSpec>;
+function getSBitfieldSpecs(targetInstance: any) {
+  return (
+    (
+      Object.getPrototypeOf(targetInstance)[SBITMASK_METADATA_KEY] as
+        | SBitmaskMetadata
+        | undefined
+    )?.fieldSpecs ?? []
+  );
 }
 
 /** Checks that the total length of bitfields matches the value wrapper length. */
@@ -141,7 +191,24 @@ function validateLength(
   if (totalBitLength !== expectedBitLength) {
     throw new Error(
       'Total length of bitfields do not match bitmask length: ' +
-        `expected ${expectedBitLength} bits, actual ${totalBitLength} bits`
+        `expected ${expectedBitLength} bits, ` +
+        `but total length of bitfields is ${totalBitLength} bits`
     );
+  }
+}
+
+/** Returns the constructor for a bitfield value. */
+function getValueType(targetInstance: any, propertyKey: string | symbol) {
+  const value = targetInstance[propertyKey];
+  switch (typeof value) {
+    case 'number':
+      return Number;
+    case 'boolean':
+      return Boolean;
+    default:
+      throw new Error(
+        `Expected property ${propertyKey.toString()} to be a number or boolean, ` +
+          `but it is ${typeof value}`
+      );
   }
 }

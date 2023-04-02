@@ -517,9 +517,9 @@ Boolean flags are also supported:
 
 ```ts
 class MyBitmask extends SBitmask.as(SUInt8) {
-  @bitfield(1, Boolean)
+  @bitfield(1)
   flag1 = false;
-  @bitfield(2, Boolean)
+  @bitfield(2)
   flag2 = false;
   @bitfield(6)
   unused = 0;
