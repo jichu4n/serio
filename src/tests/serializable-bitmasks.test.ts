@@ -1,6 +1,6 @@
 import {bitfield, SBitmask, SUInt8} from '..';
 
-class Color8Bit extends SBitmask.as(SUInt8) {
+class Color8Bit extends SBitmask.of(SUInt8) {
   @bitfield(3)
   r = 0;
   @bitfield(3)
@@ -9,7 +9,7 @@ class Color8Bit extends SBitmask.as(SUInt8) {
   b = 0;
 }
 
-class TestBooleanObject extends SBitmask.as(SUInt8) {
+class TestBooleanObject extends SBitmask.of(SUInt8) {
   @bitfield(1)
   field1 = false;
 
@@ -20,12 +20,12 @@ class TestBooleanObject extends SBitmask.as(SUInt8) {
   field3 = false;
 }
 
-class TestInvalidObjectA extends SBitmask.as(SUInt8) {
+class TestInvalidObjectA extends SBitmask.of(SUInt8) {
   @bitfield(7)
   prop = 0;
 }
 
-class TestInvalidObjectB extends SBitmask.as(SUInt8) {
+class TestInvalidObjectB extends SBitmask.of(SUInt8) {
   @bitfield(8)
   prop = false;
 }
@@ -86,10 +86,10 @@ describe('SBitmask', function () {
       bm2.serialize();
     }).toThrow();
     expect(() => {
-      const bm2 = new TestInvalidObjectB();
+      const bm3 = new TestInvalidObjectB();
       // @ts-expect-error
-      bm2.prop = null;
-      bm2.serialize();
+      bm3.prop = null;
+      bm3.serialize();
     }).toThrow();
   });
 

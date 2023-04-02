@@ -290,7 +290,7 @@ const size = arr1.getSerializedLength();
 ```
 
 `SArray` can be combined with wrappers such as `SUInt32LE` and `SStringNT` using
-`SArray.of(wrapper)` to wrap arrays of numbers, strings, etc. Since `SArray` is
+`SArray.of(wrapperClass)` to wrap arrays of numbers, strings, etc. Since `SArray` is
 itself a wrapper for arrays, multiple levels of `SArray` can be combined
 together using `SArray.of(SArray.of(...))` to wrap multi-dimensional arrays. For
 example:
@@ -481,10 +481,10 @@ interface is similar to `SObject`. Example usage:
 /** An 8-bit color in the format RRR GG BB (see
  * https://en.wikipedia.org/wiki/8-bit_color).
  *
- * SBitmask.as(wrapper type) produces a base class that serializes
+ * SBitmask.of(wrapperClass) produces a base class that serializes
  * to the specified length.
  */
-class Color8Bit extends SBitmask.as(SUInt8) {
+class Color8Bit extends SBitmask.of(SUInt8) {
   // @bitfield(number of bits) is used to annotate the fields that go into the
   // bitmask, from most significant to least significant.
   @bitfield(3)
@@ -517,7 +517,7 @@ console.log(c3.toJSON()); // => {r: 7, g: 0, b: 2}
 Boolean flags are also supported:
 
 ```ts
-class MyBitmask extends SBitmask.as(SUInt8) {
+class MyBitmask extends SBitmask.of(SUInt8) {
   @bitfield(1)
   flag1 = false;
   @bitfield(2)
