@@ -45,10 +45,23 @@ describe('SArray', function () {
     expect(arr1.value).toHaveLength(3);
     expect(arr1.toJSON()).toStrictEqual([0, 0, 0]);
     expect(arr1.serialize()).toStrictEqual(Buffer.of(0, 0, 0));
+    arr1.deserialize(Buffer.of(42, 42, 42, 42));
+    expect(arr1.serialize()).toStrictEqual(Buffer.of(42, 42, 42));
 
-    arr1.value.push(new SInt8());
-    expect(() => arr1.serialize()).toThrow();
-    expect(() => arr1.deserialize(Buffer.of(0, 0, 0, 0))).toThrow();
+    arr1.value.push(SInt8.of(100));
+    expect(arr1.value).toHaveLength(4);
+    expect(arr1.serialize()).toStrictEqual(Buffer.of(42, 42, 42));
+    expect(arr1.value).toHaveLength(4);
+    arr1.deserialize(Buffer.of(53, 53, 53, 53));
+    expect(arr1.value).toHaveLength(4);
+    expect(arr1.toJSON()).toStrictEqual([53, 53, 53]);
+
+    arr1.value = [];
+    expect(arr1.serialize()).toStrictEqual(Buffer.of(0, 0, 0));
+    expect(arr1.value).toHaveLength(0);
+    arr1.deserialize(Buffer.of(42, 42, 42, 42));
+    expect(arr1.value).toHaveLength(3);
+    expect(arr1.toJSON()).toStrictEqual([42, 42, 42]);
   });
 
   test('error handling', function () {
@@ -136,13 +149,38 @@ describe('SArrayWithWrapper', function () {
   test('fixed length', function () {
     const arr1 = new (SArray.of(SInt8).ofLength(3))();
     expect(arr1.value).toHaveLength(3);
-    expect(arr1.value).toStrictEqual([0, 0, 0]);
     expect(arr1.toJSON()).toStrictEqual([0, 0, 0]);
     expect(arr1.serialize()).toStrictEqual(Buffer.of(0, 0, 0));
+    arr1.deserialize(Buffer.of(42, 42, 42, 42));
+    expect(arr1.serialize()).toStrictEqual(Buffer.of(42, 42, 42));
 
-    arr1.value.push(0);
-    expect(() => arr1.serialize()).toThrow();
-    expect(() => arr1.deserialize(Buffer.of(0, 0, 0, 0))).toThrow();
+    arr1.value.push(100);
+    expect(arr1.value).toHaveLength(4);
+    expect(arr1.serialize()).toStrictEqual(Buffer.of(42, 42, 42));
+    expect(arr1.value).toHaveLength(4);
+    arr1.deserialize(Buffer.of(53, 53, 53, 53));
+    expect(arr1.value).toHaveLength(4);
+    expect(arr1.toJSON()).toStrictEqual([53, 53, 53]);
+
+    arr1.value = [];
+    expect(arr1.serialize()).toStrictEqual(Buffer.of(0, 0, 0));
+    expect(arr1.value).toHaveLength(0);
+    arr1.deserialize(Buffer.of(42, 42, 42, 42));
+    expect(arr1.value).toHaveLength(3);
+    expect(arr1.toJSON()).toStrictEqual([42, 42, 42]);
+
+    const arr2 = new (SArray.of(SArray.of(SInt8).ofLength(3)).ofLength(2))();
+    expect(arr2.toJSON()).toStrictEqual([
+      [0, 0, 0],
+      [0, 0, 0],
+    ]);
+    expect(arr2.serialize()).toStrictEqual(Buffer.of(0, 0, 0, 0, 0, 0));
+    arr2.deserialize(Buffer.of(1, 2, 3, 4, 5, 6));
+    expect(arr2.toJSON()).toStrictEqual([
+      [1, 2, 3],
+      [4, 5, 6],
+    ]);
+    expect(arr2.serialize()).toStrictEqual(Buffer.of(1, 2, 3, 4, 5, 6));
   });
 
   test('error handling', function () {

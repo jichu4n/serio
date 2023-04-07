@@ -5,7 +5,6 @@ import {
   Serializable,
   SerializableWrapper,
   SerializeOptions,
-  WrappedValueT,
 } from '.';
 import {toJSON} from './utils';
 
@@ -17,11 +16,18 @@ export class SArray<ValueT extends Serializable> extends SerializableWrapper<
   value: Array<ValueT> = [];
   /** Fixed size, or undefined if dynamically sized. */
   readonly length?: number;
+  /** Element constructor in fixed size SArrays.
+   *
+   * Will only be present if length !== undefined. */
+  readonly elementType?: new () => ValueT;
 
   deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
     let offset = 0;
-    this.map((element) => {
+    this.map((element, index) => {
       offset += element.deserialize(buffer.slice(offset), opts);
+      if (index >= this.value.length) {
+        this.value.push(element);
+      }
     });
     return offset;
   }
@@ -73,19 +79,28 @@ export class SArray<ValueT extends Serializable> extends SerializableWrapper<
     return class extends SArray<ValueT> {
       value = times(length, () => new elementType());
       length = length;
+      elementType = elementType;
     };
   }
 
   map<FnT extends (element: ValueT, index: number) => any>(
     fn: FnT
   ): Array<ReturnType<FnT>> {
-    if (this.length !== undefined && this.value.length !== this.length) {
-      throw new Error(
-        'SArray value has invalid length: ' +
-          `expected ${this.length}, but value has length ${this.value.length}`
-      );
+    let elements: Array<ValueT>;
+    if (this.length !== undefined && this.value.length < this.length) {
+      elements = [
+        ...this.value,
+        ...times(
+          this.length - this.value.length,
+          () => new this.elementType!()
+        ),
+      ];
+    } else if (this.length !== undefined && this.value.length > this.length) {
+      elements = this.value.slice(0, this.length);
+    } else {
+      elements = this.value;
     }
-    return this.value.map((element, index) => {
+    return elements.map((element, index) => {
       try {
         return fn(element, index);
       } catch (e) {
