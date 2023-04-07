@@ -14,7 +14,7 @@
 <ul class="tsd-breadcrumb">
 <li><a href="../modules.html">serio</a></li>
 <li><a href="SArrayWithWrapper.html">SArrayWithWrapper</a></li></ul>
-<h1>Class SArrayWithWrapper&lt;ValueT, WrapperT&gt;<code class="tsd-tag ts-flagAbstract">Abstract</code> </h1></div>
+<h1>Class SArrayWithWrapper&lt;ValueT&gt;<code class="tsd-tag ts-flagAbstract">Abstract</code> </h1></div>
 <section class="tsd-panel tsd-comment">
 <div class="tsd-comment tsd-typography"><p>SArray variant that wraps each element for serialization / deserialization.</p>
 </div></section> 
@@ -22,9 +22,7 @@
 <h4>Type Parameters</h4>
 <ul class="tsd-type-parameters">
 <li>
-<h4>ValueT</h4></li>
-<li>
-<h4>WrapperT<span class="tsd-signature-symbol"> extends </span><a href="SerializableWrapper.html" class="tsd-signature-type" data-tsd-kind="Class">SerializableWrapper</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">ValueT</span><span class="tsd-signature-symbol">&gt;</span></h4></li></ul></section> 
+<h4>ValueT</h4></li></ul></section> 
 <section class="tsd-panel tsd-hierarchy">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
@@ -32,7 +30,7 @@
 <ul class="tsd-hierarchy">
 <li><span class="target">SArrayWithWrapper</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/jichu4n/serio/blob/49017b4/src/serializable-arrays.ts#L113">src/serializable-arrays.ts:113</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/jichu4n/serio/blob/48d408c/src/serializable-arrays.ts#L141">src/serializable-arrays.ts:141</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -44,7 +42,8 @@
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Properties</h3>
-<div class="tsd-index-list"><a href="SArrayWithWrapper.html#value" class="tsd-index-link tsd-kind-property tsd-parent-kind-class"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF984D" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-1024-path"></rect><path d="M9.354 16V7.24H12.174C12.99 7.24 13.638 7.476 14.118 7.948C14.606 8.412 14.85 9.036 14.85 9.82C14.85 10.604 14.606 11.232 14.118 11.704C13.638 12.168 12.99 12.4 12.174 12.4H10.434V16H9.354ZM10.434 11.428H12.174C12.646 11.428 13.022 11.284 13.302 10.996C13.59 10.7 13.734 10.308 13.734 9.82C13.734 9.324 13.59 8.932 13.302 8.644C13.022 8.356 12.646 8.212 12.174 8.212H10.434V11.428Z" fill="var(--color-text)" id="icon-1024-text"></path></svg><span>value</span></a>
+<div class="tsd-index-list"><a href="SArrayWithWrapper.html#length" class="tsd-index-link tsd-kind-property tsd-parent-kind-class"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF984D" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-1024-path"></rect><path d="M9.354 16V7.24H12.174C12.99 7.24 13.638 7.476 14.118 7.948C14.606 8.412 14.85 9.036 14.85 9.82C14.85 10.604 14.606 11.232 14.118 11.704C13.638 12.168 12.99 12.4 12.174 12.4H10.434V16H9.354ZM10.434 11.428H12.174C12.646 11.428 13.022 11.284 13.302 10.996C13.59 10.7 13.734 10.308 13.734 9.82C13.734 9.324 13.59 8.932 13.302 8.644C13.022 8.356 12.646 8.212 12.174 8.212H10.434V11.428Z" fill="var(--color-text)" id="icon-1024-text"></path></svg><span>length?</span></a>
+<a href="SArrayWithWrapper.html#value" class="tsd-index-link tsd-kind-property tsd-parent-kind-class"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>value</span></a>
 <a href="SArrayWithWrapper.html#wrapperType" class="tsd-index-link tsd-kind-property tsd-parent-kind-class"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>wrapper<wbr/>Type</span></a>
 </div></section>
 <section class="tsd-index-section">
@@ -56,26 +55,30 @@
 <a href="SArrayWithWrapper.html#toSArray" class="tsd-index-link tsd-kind-method tsd-parent-kind-class"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>toSArray</span></a>
 <a href="SArrayWithWrapper.html#from" class="tsd-index-link tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>from</span></a>
 <a href="SArrayWithWrapper.html#of" class="tsd-index-link tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>of</span></a>
-<a href="SArrayWithWrapper.html#ofLength" class="tsd-index-link tsd-kind-method tsd-parent-kind-class"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>of<wbr/>Length</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Constructors</h2>
 <section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><a id="constructor" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" id="icon-anchor-a"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" id="icon-anchor-b"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" id="icon-anchor-c"></path></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited">
-<li class="tsd-signature tsd-anchor-link" id="constructor.new_SArrayWithWrapper">new SArray<wbr/>With<wbr/>Wrapper<span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">ValueT</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="SArrayWithWrapper.html" class="tsd-signature-type" data-tsd-kind="Class">SArrayWithWrapper</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">ValueT</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span><a href="#constructor.new_SArrayWithWrapper" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="constructor.new_SArrayWithWrapper">new SArray<wbr/>With<wbr/>Wrapper<span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">ValueT</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="SArrayWithWrapper.html" class="tsd-signature-type" data-tsd-kind="Class">SArrayWithWrapper</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">ValueT</span><span class="tsd-signature-symbol">&gt;</span><a href="#constructor.new_SArrayWithWrapper" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <section class="tsd-panel tsd-type-parameters">
 <h4>Type Parameters</h4>
 <ul class="tsd-type-parameters">
 <li>
-<h4>ValueT</h4></li>
-<li>
-<h4>WrapperT<span class="tsd-signature-symbol"> extends </span><a href="SerializableWrapper.html" class="tsd-signature-type" data-tsd-kind="Class">SerializableWrapper</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">ValueT</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span></h4></li></ul></section>
-<h4 class="tsd-returns-title">Returns <a href="SArrayWithWrapper.html" class="tsd-signature-type" data-tsd-kind="Class">SArrayWithWrapper</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">ValueT</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
+<h4>ValueT</h4></li></ul></section>
+<h4 class="tsd-returns-title">Returns <a href="SArrayWithWrapper.html" class="tsd-signature-type" data-tsd-kind="Class">SArrayWithWrapper</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">ValueT</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="SerializableWrapper.html">SerializableWrapper</a>.<a href="SerializableWrapper.html#constructor">constructor</a></p></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
+<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class"><a id="length" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>length</span><a href="#length" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<div class="tsd-signature">length<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
+<div class="tsd-comment tsd-typography"><p>Fixed size, or undefined if dynamically sized.</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/jichu4n/serio/blob/48d408c/src/serializable-arrays.ts#L149">src/serializable-arrays.ts:149</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class"><a id="value" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>value</span><a href="#value" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">value<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type" data-tsd-kind="Type parameter">ValueT</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div>
@@ -83,22 +86,22 @@
 </div><aside class="tsd-sources">
 <p>Overrides <a href="SerializableWrapper.html">SerializableWrapper</a>.<a href="SerializableWrapper.html#value">value</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/jichu4n/serio/blob/49017b4/src/serializable-arrays.ts#L118">src/serializable-arrays.ts:118</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/jichu4n/serio/blob/48d408c/src/serializable-arrays.ts#L145">src/serializable-arrays.ts:145</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class"><a id="wrapperType" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagAbstract">Abstract</code> <span>wrapper<wbr/>Type</span><a href="#wrapperType" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature">wrapper<wbr/>Type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">new </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">)</span></div>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagReadonly">Readonly</code> <code class="tsd-tag ts-flagAbstract">Abstract</code> <span>wrapper<wbr/>Type</span><a href="#wrapperType" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<div class="tsd-signature">wrapper<wbr/>Type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">new </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><a href="SerializableWrapper.html" class="tsd-signature-type" data-tsd-kind="Class">SerializableWrapper</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">ValueT</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span></div>
 <div class="tsd-type-declaration">
 <h4>Type declaration</h4>
 <ul class="tsd-parameters">
 <li class="tsd-parameter-signature">
 <ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-property">
-<li class="tsd-signature" id="wrapperType.__type.new_wrapperType"><span class="tsd-signature-symbol">new </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span></li>
+<li class="tsd-signature" id="wrapperType.__type.new_wrapperType"><span class="tsd-signature-symbol">new </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="SerializableWrapper.html" class="tsd-signature-type" data-tsd-kind="Class">SerializableWrapper</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">ValueT</span><span class="tsd-signature-symbol">&gt;</span></li>
 <li class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Wrapper type constructor.</p>
 </div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span></h4></li></ul></li></ul></div><aside class="tsd-sources">
+<h4 class="tsd-returns-title">Returns <a href="SerializableWrapper.html" class="tsd-signature-type" data-tsd-kind="Class">SerializableWrapper</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">ValueT</span><span class="tsd-signature-symbol">&gt;</span></h4></li></ul></li></ul></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/jichu4n/serio/blob/49017b4/src/serializable-arrays.ts#L120">src/serializable-arrays.ts:120</a></li></ul></aside></section></section>
+<li>Defined in <a href="https://github.com/jichu4n/serio/blob/48d408c/src/serializable-arrays.ts#L147">src/serializable-arrays.ts:147</a></li></ul></aside></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="deserialize" class="tsd-anchor"></a>
@@ -120,7 +123,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="SerializableWrapper.html">SerializableWrapper</a>.<a href="SerializableWrapper.html#deserialize">deserialize</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/jichu4n/serio/blob/49017b4/src/serializable-arrays.ts#L122">src/serializable-arrays.ts:122</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/jichu4n/serio/blob/48d408c/src/serializable-arrays.ts#L151">src/serializable-arrays.ts:151</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="getSerializedLength" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Serialized<wbr/>Length</span><a href="#getSerializedLength" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -136,7 +139,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="SerializableWrapper.html">SerializableWrapper</a>.<a href="SerializableWrapper.html#getSerializedLength">getSerializedLength</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/jichu4n/serio/blob/49017b4/src/serializable-arrays.ts#L137">src/serializable-arrays.ts:137</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/jichu4n/serio/blob/48d408c/src/serializable-arrays.ts#L166">src/serializable-arrays.ts:166</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="serialize" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>serialize</span><a href="#serialize" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -152,26 +155,26 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Buffer</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="SerializableWrapper.html">SerializableWrapper</a>.<a href="SerializableWrapper.html#serialize">serialize</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/jichu4n/serio/blob/49017b4/src/serializable-arrays.ts#L133">src/serializable-arrays.ts:133</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/jichu4n/serio/blob/48d408c/src/serializable-arrays.ts#L162">src/serializable-arrays.ts:162</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="toJSON" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>toJSON</span><a href="#toJSON" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-<li class="tsd-signature tsd-anchor-link" id="toJSON.toJSON-1">toJSON<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><a href="#toJSON.toJSON-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="toJSON.toJSON-1">toJSON<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><a href="#toJSON.toJSON-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4><aside class="tsd-sources">
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="SerializableWrapper.html">SerializableWrapper</a>.<a href="SerializableWrapper.html#toJSON">toJSON</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/jichu4n/serio/blob/49017b4/src/serializable-arrays.ts#L141">src/serializable-arrays.ts:141</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/jichu4n/serio/blob/48d408c/src/serializable-arrays.ts#L170">src/serializable-arrays.ts:170</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="toSArray" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>toSArray</span><a href="#toSArray" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-<li class="tsd-signature tsd-anchor-link" id="toSArray.toSArray-1">toSArray<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="SArray.html" class="tsd-signature-type" data-tsd-kind="Class">SArray</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span><a href="#toSArray.toSArray-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="toSArray.toSArray-1">toSArray<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="SArray.html" class="tsd-signature-type" data-tsd-kind="Class">SArray</a><span class="tsd-signature-symbol">&lt;</span><a href="SerializableWrapper.html" class="tsd-signature-type" data-tsd-kind="Class">SerializableWrapper</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">ValueT</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#toSArray.toSArray-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Constructs an SArray of wrappers around the current array of elements.</p>
 </div>
-<h4 class="tsd-returns-title">Returns <a href="SArray.html" class="tsd-signature-type" data-tsd-kind="Class">SArray</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
+<h4 class="tsd-returns-title">Returns <a href="SArray.html" class="tsd-signature-type" data-tsd-kind="Class">SArray</a><span class="tsd-signature-symbol">&lt;</span><a href="SerializableWrapper.html" class="tsd-signature-type" data-tsd-kind="Class">SerializableWrapper</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">ValueT</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/jichu4n/serio/blob/49017b4/src/serializable-arrays.ts#L168">src/serializable-arrays.ts:168</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/jichu4n/serio/blob/48d408c/src/serializable-arrays.ts#L175">src/serializable-arrays.ts:175</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a id="from" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>from</span><a href="#from" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
@@ -202,7 +205,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type" data-tsd-kind="Type parameter">T</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="SerializableWrapper.html">SerializableWrapper</a>.<a href="SerializableWrapper.html#from">from</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/jichu4n/serio/blob/49017b4/src/serializable.ts#L37">src/serializable.ts:37</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/jichu4n/serio/blob/48d408c/src/serializable.ts#L37">src/serializable.ts:37</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a id="of" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>of</span><a href="#of" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
@@ -233,41 +236,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="SerializableWrapper.html">SerializableWrapper</a>.<a href="SerializableWrapper.html#of">of</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/jichu4n/serio/blob/49017b4/src/serializable-wrapper.ts#L13">src/serializable-wrapper.ts:13</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="ofLength" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>of<wbr/>Length</span><a href="#ofLength" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-<li class="tsd-signature tsd-anchor-link" id="ofLength.ofLength-1">of<wbr/>Length<span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">(</span>this<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">new </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><a href="SArrayWithWrapper.html" class="tsd-signature-type" data-tsd-kind="Class">SArrayWithWrapper</a><span class="tsd-signature-symbol">&lt;</span><a href="../types/WrappedValueT.html" class="tsd-signature-type" data-tsd-kind="Type alias">WrappedValueT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span>, length<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, elementValueOrGenerator<span class="tsd-signature-symbol">: </span><a href="../types/WrappedValueT.html" class="tsd-signature-type" data-tsd-kind="Type alias">WrappedValueT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span>idx<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><a href="../types/WrappedValueT.html" class="tsd-signature-type" data-tsd-kind="Type alias">WrappedValueT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="SArrayWithWrapper.html" class="tsd-signature-type" data-tsd-kind="Class">SArrayWithWrapper</a><span class="tsd-signature-symbol">&lt;</span><a href="../types/WrappedValueT.html" class="tsd-signature-type" data-tsd-kind="Type alias">WrappedValueT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span><a href="#ofLength.ofLength-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Create an SArrayWithWrapper instance with a given length, filled with the provided
-element value or generator function.</p>
-</div>
-<section class="tsd-panel tsd-type-parameters">
-<h4>Type Parameters</h4>
-<ul class="tsd-type-parameters">
-<li>
-<h4>WrapperT<span class="tsd-signature-symbol"> extends </span><a href="SerializableWrapper.html" class="tsd-signature-type" data-tsd-kind="Class">SerializableWrapper</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span></h4></li></ul></section>
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5>this: <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">new </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><a href="SArrayWithWrapper.html" class="tsd-signature-type" data-tsd-kind="Class">SArrayWithWrapper</a><span class="tsd-signature-symbol">&lt;</span><a href="../types/WrappedValueT.html" class="tsd-signature-type" data-tsd-kind="Type alias">WrappedValueT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span></h5>
-<ul class="tsd-parameters">
-<li class="tsd-parameter-signature">
-<ul class="tsd-signatures tsd-kind-constructor">
-<li class="tsd-signature"><span class="tsd-signature-symbol">new </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="SArrayWithWrapper.html" class="tsd-signature-type" data-tsd-kind="Class">SArrayWithWrapper</a><span class="tsd-signature-symbol">&lt;</span><a href="../types/WrappedValueT.html" class="tsd-signature-type" data-tsd-kind="Type alias">WrappedValueT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span></li>
-<li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <a href="SArrayWithWrapper.html" class="tsd-signature-type" data-tsd-kind="Class">SArrayWithWrapper</a><span class="tsd-signature-symbol">&lt;</span><a href="../types/WrappedValueT.html" class="tsd-signature-type" data-tsd-kind="Type alias">WrappedValueT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span></h4></li></ul></li></ul></li>
-<li>
-<h5>length: <span class="tsd-signature-type">number</span></h5></li>
-<li>
-<h5>elementValueOrGenerator: <a href="../types/WrappedValueT.html" class="tsd-signature-type" data-tsd-kind="Type alias">WrappedValueT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span>idx<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><a href="../types/WrappedValueT.html" class="tsd-signature-type" data-tsd-kind="Type alias">WrappedValueT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span></h5>
-<div class="tsd-comment tsd-typography"><p>An element value or a function that returns an
-    element value.</p>
-</div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <a href="SArrayWithWrapper.html" class="tsd-signature-type" data-tsd-kind="Class">SArrayWithWrapper</a><span class="tsd-signature-symbol">&lt;</span><a href="../types/WrappedValueT.html" class="tsd-signature-type" data-tsd-kind="Type alias">WrappedValueT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type" data-tsd-kind="Type parameter">WrapperT</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/jichu4n/serio/blob/49017b4/src/serializable-arrays.ts#L151">src/serializable-arrays.ts:151</a></li></ul></aside></li></ul></section></section></div>
+<li>Defined in <a href="https://github.com/jichu4n/serio/blob/48d408c/src/serializable-wrapper.ts#L13">src/serializable-wrapper.ts:13</a></li></ul></aside></li></ul></section></section></div>
 <div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 <div class="tsd-navigation settings">
 <details class="tsd-index-accordion"><summary class="tsd-accordion-summary">
@@ -293,6 +262,7 @@ element value or generator function.</p>
 <li class="current tsd-kind-class"><a href="SArrayWithWrapper.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-class)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6" id="icon-128-path"></rect><path d="M11.898 16.1201C11.098 16.1201 10.466 15.8961 10.002 15.4481C9.53803 15.0001 9.30603 14.3841 9.30603 13.6001V9.64012C9.30603 8.85612 9.53803 8.24012 10.002 7.79212C10.466 7.34412 11.098 7.12012 11.898 7.12012C12.682 7.12012 13.306 7.34812 13.77 7.80412C14.234 8.25212 14.466 8.86412 14.466 9.64012H13.386C13.386 9.14412 13.254 8.76412 12.99 8.50012C12.734 8.22812 12.37 8.09212 11.898 8.09212C11.426 8.09212 11.054 8.22412 10.782 8.48812C10.518 8.75212 10.386 9.13212 10.386 9.62812V13.6001C10.386 14.0961 10.518 14.4801 10.782 14.7521C11.054 15.0161 11.426 15.1481 11.898 15.1481C12.37 15.1481 12.734 15.0161 12.99 14.7521C13.254 14.4801 13.386 14.0961 13.386 13.6001H14.466C14.466 14.3761 14.234 14.9921 13.77 15.4481C13.306 15.8961 12.682 16.1201 11.898 16.1201Z" fill="var(--color-text)" id="icon-128-text"></path></svg><span>SArray<wbr/>With<wbr/>Wrapper</span></a>
 <ul>
 <li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><a href="SArrayWithWrapper.html#constructor" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-512-path"></use><use href="#icon-512-text"></use></svg>constructor</a></li>
+<li class="tsd-kind-property tsd-parent-kind-class"><a href="SArrayWithWrapper.html#length" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>length?</a></li>
 <li class="tsd-kind-property tsd-parent-kind-class"><a href="SArrayWithWrapper.html#value" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>value</a></li>
 <li class="tsd-kind-property tsd-parent-kind-class"><a href="SArrayWithWrapper.html#wrapperType" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>wrapper<wbr/>Type</a></li>
 <li class="tsd-kind-method tsd-parent-kind-class"><a href="SArrayWithWrapper.html#deserialize" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>deserialize</a></li>
@@ -301,8 +271,7 @@ element value or generator function.</p>
 <li class="tsd-kind-method tsd-parent-kind-class"><a href="SArrayWithWrapper.html#toJSON" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>toJSON</a></li>
 <li class="tsd-kind-method tsd-parent-kind-class"><a href="SArrayWithWrapper.html#toSArray" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>toSArray</a></li>
 <li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="SArrayWithWrapper.html#from" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>from</a></li>
-<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="SArrayWithWrapper.html#of" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>of</a></li>
-<li class="tsd-kind-method tsd-parent-kind-class"><a href="SArrayWithWrapper.html#ofLength" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>of<wbr/>Length</a></li></ul></li></ul></nav></div></div>
+<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="SArrayWithWrapper.html#of" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>of</a></li></ul></li></ul></nav></div></div>
 <div class="container tsd-generator">
 <p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div>
 <div class="overlay"></div><script src="../assets/main.js"></script></body></html>
