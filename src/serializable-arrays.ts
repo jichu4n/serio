@@ -72,6 +72,7 @@ export class SArray<ValueT extends Serializable> extends SerializableWrapper<
     );
   }
 
+  /** Returns an SArray class that pads / truncates to the provided length. */
   static ofLength<ValueT extends Serializable>(
     length: number,
     elementType: new () => ValueT
@@ -83,6 +84,8 @@ export class SArray<ValueT extends Serializable> extends SerializableWrapper<
     };
   }
 
+  /** Applys the provided function over the elements of the array, subject to
+   * padding / truncation. */
   map<FnT extends (element: ValueT, index: number) => any>(
     fn: FnT
   ): Array<ReturnType<FnT>> {
@@ -130,6 +133,9 @@ function createSArrayWithWrapperClass<ValueT>(
     wrapperType = wrapperType;
     length = length;
 
+    /** Returns an SArrayWithWrapper class that pads / truncates to the provided
+     * length.
+     */
     static ofLength(length: number) {
       return createSArrayWithWrapperClass<ValueT>(wrapperType, length);
     }
@@ -171,7 +177,16 @@ export abstract class SArrayWithWrapper<ValueT> extends SerializableWrapper<
     return this.toSArray().toJSON();
   }
 
-  /** Constructs an SArray of wrappers around the current array of elements. */
+  /** Returns an SArrayWithWrapper class that pads / truncates to the provided
+   * length.
+   *
+   * Not to be invoked directly -- use SArray.of(wrapperType).ofLength(N).
+   */
+  static ofLength<ValueT extends Serializable>(length: number) {
+    throw new Error('Unimplemented');
+  }
+
+  /**  Constructs an SArray of wrappers around the current array of elements. */
   toSArray() {
     const cls =
       this.length === undefined
