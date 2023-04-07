@@ -270,9 +270,7 @@ const arr1 = new SArray<SUInt32LE>();
 // ...with an initial set of values:
 const arr2 = SArray.of([obj1, obj2, obj3]);
 // ...with an element value repeated N times:
-const arr3 = SArray.ofLength(5, () => SUInt32LE.of(42));
-// ...by decoding from a buffer:
-const arr4 = SArray.ofLength(5, () => SUInt32LE.of(0)).from(buffer);
+const arr3 = SArray.of(_.times(5, () => SUInt32LE.of(0)));
 
 // The underlying array can be manipulated via the `value` property:
 arr1.value.forEach(...);
@@ -465,7 +463,7 @@ class ExampleObject extends SObject {
 }
 
 // Equivalent C: ExampleObject[5]
-const arr1 = SArray.ofLength(5, () => new ExampleObject());
+const arr1 = SArray.of(_.times(5, () => new ExampleObject()));
 console.log(arr1.value[0].prop3[0][0]); // => 'hello'
 ```
 

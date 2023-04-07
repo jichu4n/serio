@@ -1,3 +1,4 @@
+import times from 'lodash/times';
 import {
   SArray,
   SArrayError,
@@ -6,22 +7,13 @@ import {
   SObject,
   SStringNT,
   SUInt16BE,
-  Serializable,
 } from '../';
 import {ThrowingSerializable} from './throwing-serializable';
 
 describe('SArray', function () {
   test('create', function () {
-    const arr1 = SArray.ofLength(3, () => SUInt16BE.of(42));
+    const arr1 = SArray.of(times(3, () => SUInt16BE.of(42)));
     expect(arr1.value.map(({value}) => value)).toStrictEqual([42, 42, 42]);
-
-    const arr2 = SArray.ofLength(3, function () {
-      return SUInt16BE.of(42);
-    });
-    expect(arr2.value.map(({value}) => value)).toStrictEqual([42, 42, 42]);
-
-    const arr3 = SArray.ofLength(3, () => SUInt16BE.of(42));
-    expect(arr3.value.map(({value}) => value)).toStrictEqual([42, 42, 42]);
   });
 
   test('serialize and deserialize', function () {
@@ -95,27 +87,19 @@ describe('SArray', function () {
 
 describe('SArrayWithWrapper', function () {
   test('create', function () {
-    const arr1 = SArray.of(SUInt16BE).ofLength(3, 42);
+    const arr1 = SArray.of(SUInt16BE).of([42, 42, 42]);
     expect(arr1.value).toStrictEqual([42, 42, 42]);
-
-    const arr2 = SArray.of(SUInt16BE).ofLength(3, function () {
-      return 42;
-    });
-    expect(arr2.value).toStrictEqual([42, 42, 42]);
-
-    const arr3 = SArray.of(SUInt16BE).ofLength(3, () => 42);
-    expect(arr3.value).toStrictEqual([42, 42, 42]);
   });
 
   test('serialize and deserialize', function () {
     const arr1 = SArray.of(SUInt16BE).of([100, 200, 300]);
     expect(arr1.getSerializedLength()).toStrictEqual(6);
 
-    const arr2 = SArray.ofLength(3, () => SUInt16BE.of(0));
+    const arr2 = SArray.of(times(3, () => SUInt16BE.of(0)));
     arr2.deserialize(arr1.serialize());
     expect(arr2.value.map(({value}) => value)).toStrictEqual([100, 200, 300]);
 
-    const arr3 = SArray.of(SUInt16BE).ofLength(3, 0);
+    const arr3 = SArray.of(SUInt16BE).of([0, 0, 0]);
     arr3.deserialize(arr1.serialize());
     expect(arr3.value).toStrictEqual([100, 200, 300]);
 
@@ -125,7 +109,7 @@ describe('SArrayWithWrapper', function () {
       [7, 8, 9],
     ]);
     expect(arr4.getSerializedLength()).toStrictEqual(18);
-    const arr5 = SArray.of(SUInt16BE).ofLength(9, 0);
+    const arr5 = SArray.of(SUInt16BE).of(times(9, () => 0));
     arr5.deserialize(arr4.serialize());
     expect(arr5.value).toStrictEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
   });

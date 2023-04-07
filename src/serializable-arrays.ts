@@ -36,18 +36,6 @@ export class SArray<
     return this.map(toJSON);
   }
 
-  /** Create an SArray instance with a given length, filled with the provided
-   * generator function.
-   *
-   * @param elementGenerator A function that returns an element value.
-   */
-  static ofLength<ValueT extends Serializable = Serializable>(
-    length: number,
-    elementGenerator: (idx: number) => ValueT
-  ): SArray<ValueT> {
-    return SArray.of(times(length, elementGenerator));
-  }
-
   /** Create a new instance of this wrapper class from a raw value. */
   static of<ValueT extends Serializable, WrapperT extends SArray<ValueT>>(
     this: new () => WrapperT,
@@ -142,27 +130,6 @@ export abstract class SArrayWithWrapper<
     return this.toSArray().toJSON();
   }
 
-  /** Create an SArrayWithWrapper instance with a given length, filled with the provided
-   * element value or generator function.
-   *
-   * @param elementValueOrGenerator An element value or a function that returns an
-   *     element value.
-   */
-  static ofLength<WrapperT extends SerializableWrapper<any>>(
-    this: new () => SArrayWithWrapper<WrappedValueT<WrapperT>, WrapperT>,
-    length: number,
-    elementValueOrGenerator:
-      | WrappedValueT<WrapperT>
-      | ((idx: number) => WrappedValueT<WrapperT>)
-  ): SArrayWithWrapper<WrappedValueT<WrapperT>, WrapperT> {
-    const elementGenerator =
-      typeof elementValueOrGenerator === 'function'
-        ? elementValueOrGenerator
-        : () => elementValueOrGenerator;
-    const instance = new this();
-    instance.value = times(length, elementGenerator);
-    return instance;
-  }
 
   /** Constructs an SArray of wrappers around the current array of elements. */
   toSArray() {
