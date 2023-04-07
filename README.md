@@ -293,13 +293,10 @@ combined with wrapper classes such as `SUInt32LE` and `SStringNT` using
 `SArray`s can be created using `SArray.of(SArray.of(...))`. For example:
 
 ```ts
-// Create an SArray equivalent to uint8_t[5], initialized to 0.
-const arr1 = SArray.of(SUInt8).ofLength(5, 0);
-console.log(arr1.value); // [0, 0, 0, 0, 0]
-
-// Create an SArray equivalent to uint8_t[5], with initial values.
-const arr2 = SArray.of(SUInt8).ofLength(5, (idx) => idx);
-console.log(arr2.value); // [0, 1, 2, 3, 4]
+// Create an SArray equivalent to uint8_t[3], initialized to 0.
+const arr1 = SArray.of(SUInt8).of([0, 0, 0]);
+console.log(arr1.value); // [0, 0, 0]
+console.log(arr1.serialize()); // Buffer.of(0, 0, 0)
 
 // Create an SArray of strings from an existing array:
 const arr3 = SArray.of(SStringNT.ofLength(10)).of(['hello', 'foo', 'bar']);
@@ -321,6 +318,42 @@ console.log([
 ]);
 arr5.serialize({encoding: 'gb2312'});
 arr5.deserialize(buffer, {encoding: 'gb2312'});
+```
+
+### Fixed sized arrays
+
+[SArray.ofLength(N)](https://jichu4n.github.io/serio/classes/SArray.html#ofLength)
+and
+[SArray.of(wrapperType).ofLength(N)](https://jichu4n.github.io/serio/classes/SArrayWithWrapper.html#ofLength)
+can be used to represent fixed size arrays, equivalent to C arrays
+(`elementType[N]`). An instance of `SArray.ofLength(N)` or
+`SArray.of(wrapperType).ofLength(N)` will pad / truncate the array to size N
+during serialization and deserialization.
+
+Example usage:
+
+```ts
+// Create a fixed size array equivalent to uint8_t[3], initialized to 0.
+const arr1 = new (SArray.of(SUInt8).ofLength(3))();
+console.log(arr1.value); // [0, 0, 0]
+
+// Extra elements are ignored during serialization.
+arr1.value = [1, 2, 3, 4, 5];
+console.log(arr1.getSerializedLength()); // 3
+console.log(arr1.toJSON()); // [1, 2, 3]
+console.log(arr1.serialize()); // Buffer.of([1, 2, 3]);
+// Extra elements are ignored and kept as-is during deserialization.
+arr1.deserialize(Buffer.of(6, 7, 8, 9, 10));
+console.log(arr1.value); // [6, 7, 8, 4, 5]
+console.log(arr1.serialize()); // Buffer.of([6, 7, 8]);
+
+// Missing elements are padded with default values during serialization.
+arr1.value = [];
+console.log(arr1.getSerializedLength()); // 3
+console.log(arr1.serialize()); // Buffer.of([0, 0, 0]);
+// Missing elements are added during deserialization.
+arr1.deserialize(Buffer.of(101, 102, 103));
+console.log(arr1.value); // [101, 102, 103]
 ```
 
 ## Objects
