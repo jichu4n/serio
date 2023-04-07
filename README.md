@@ -322,11 +322,11 @@ arr5.deserialize(buffer, {encoding: 'gb2312'});
 
 ### Fixed sized arrays
 
-[SArray.ofLength(N)](https://jichu4n.github.io/serio/classes/SArray.html#ofLength)
-and
-[SArray.of(wrapperType).ofLength(N)](https://jichu4n.github.io/serio/classes/SArrayWithWrapper.html#ofLength)
+[`SArray.ofLength(N,
+elementType)`](https://jichu4n.github.io/serio/classes/SArray.html#ofLength) and
+[`SArray.of(wrapperType).ofLength(N)`](https://jichu4n.github.io/serio/classes/SArrayWithWrapper.html#ofLength)
 can be used to represent fixed size arrays, equivalent to C arrays
-(`elementType[N]`). An instance of `SArray.ofLength(N)` or
+(`elementType[N]`). An instance of `SArray.ofLength(N, elementType)` or
 `SArray.of(wrapperType).ofLength(N)` will pad / truncate the array to size N
 during serialization and deserialization.
 
