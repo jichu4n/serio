@@ -342,7 +342,7 @@ arr1.value = [1, 2, 3, 4, 5];
 console.log(arr1.getSerializedLength()); // 3
 console.log(arr1.toJSON()); // [1, 2, 3]
 console.log(arr1.serialize()); // Buffer.of([1, 2, 3]);
-// Extra elements are ignored and kept as-is during deserialization.
+// Extra elements are preserved as-is during deserialization.
 arr1.deserialize(Buffer.of(6, 7, 8, 9, 10));
 console.log(arr1.value); // [6, 7, 8, 4, 5]
 console.log(arr1.serialize()); // Buffer.of([6, 7, 8]);
