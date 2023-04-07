@@ -12,20 +12,18 @@ export abstract class SBitmask extends SerializableWrapper<number> {
   ): SBitmaskT;
   /** Returns an SBitmask class that serializes using the provided
    * SerializableWrapper. */
-  static of<WrapperT extends SerializableWrapper<number>>(
-    wrapperType: new () => WrapperT
-  ): ReturnType<typeof createSBitmaskClass<WrapperT>>;
-  static of<WrapperT extends SerializableWrapper<number>>(
-    valueOrWrapperType: number | (new () => WrapperT)
-  ) {
-    if (typeof valueOrWrapperType === 'number') {
-      return super.of(valueOrWrapperType);
+  static of(
+    wrapperType: new () => SerializableWrapper<number>
+  ): ReturnType<typeof createSBitmaskClass>;
+  static of(arg: number | (new () => SerializableWrapper<number>)) {
+    if (typeof arg === 'number') {
+      return super.of(arg);
     }
     if (
-      typeof valueOrWrapperType === 'function' &&
-      valueOrWrapperType.prototype instanceof SerializableWrapper
+      typeof arg === 'function' &&
+      arg.prototype instanceof SerializableWrapper
     ) {
-      return createSBitmaskClass(valueOrWrapperType);
+      return createSBitmaskClass(arg);
     }
     throw new Error(
       'SBitmask.of() should be invoked either with a number value ' +
@@ -106,8 +104,8 @@ export abstract class SBitmask extends SerializableWrapper<number> {
   }
 }
 
-function createSBitmaskClass<WrapperT extends SerializableWrapper<number>>(
-  wrapperType: new () => WrapperT
+function createSBitmaskClass(
+  wrapperType: new () => SerializableWrapper<number>
 ) {
   return class extends SBitmask {
     wrapperType = wrapperType;

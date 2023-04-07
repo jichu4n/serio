@@ -6,7 +6,7 @@ import {DeserializeOptions, SerializableWrapper, SerializeOptions} from '.';
 export class SStringNT extends SerializableWrapper<string> {
   value: string = '';
   /** Fixed serialized size, or undefined if dynamically sized. */
-  length?: number;
+  readonly length?: number;
 
   deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
     let reader: SmartBuffer;

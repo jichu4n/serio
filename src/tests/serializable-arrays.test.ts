@@ -40,6 +40,17 @@ describe('SArray', function () {
     expect(arr1.toJSON()).toStrictEqual(['hello', 42, [100, 200]]);
   });
 
+  test('fixed length', function () {
+    const arr1 = new (SArray.ofLength(3, SInt8))();
+    expect(arr1.value).toHaveLength(3);
+    expect(arr1.toJSON()).toStrictEqual([0, 0, 0]);
+    expect(arr1.serialize()).toStrictEqual(Buffer.of(0, 0, 0));
+
+    arr1.value.push(new SInt8());
+    expect(() => arr1.serialize()).toThrow();
+    expect(() => arr1.deserialize(Buffer.of(0, 0, 0, 0))).toThrow();
+  });
+
   test('error handling', function () {
     const arr1 = SArray.of([
       SUInt16BE.of(3),
@@ -120,6 +131,18 @@ describe('SArrayWithWrapper', function () {
 
     const arr2 = SArray.of(SStringNT).of(['hello', 'world']);
     expect(arr2.toJSON()).toStrictEqual(['hello', 'world']);
+  });
+
+  test('fixed length', function () {
+    const arr1 = new (SArray.of(SInt8).ofLength(3))();
+    expect(arr1.value).toHaveLength(3);
+    expect(arr1.value).toStrictEqual([0, 0, 0]);
+    expect(arr1.toJSON()).toStrictEqual([0, 0, 0]);
+    expect(arr1.serialize()).toStrictEqual(Buffer.of(0, 0, 0));
+
+    arr1.value.push(0);
+    expect(() => arr1.serialize()).toThrow();
+    expect(() => arr1.deserialize(Buffer.of(0, 0, 0, 0))).toThrow();
   });
 
   test('error handling', function () {

@@ -10,11 +10,13 @@ import {
 import {toJSON} from './utils';
 
 /** A Serializable that represents a concatenation of other Serializables. */
-export class SArray<
-  ValueT extends Serializable = Serializable
-> extends SerializableWrapper<Array<ValueT>> {
+export class SArray<ValueT extends Serializable> extends SerializableWrapper<
+  Array<ValueT>
+> {
   /** Array of Serializables. */
   value: Array<ValueT> = [];
+  /** Fixed size, or undefined if dynamically sized. */
+  readonly length?: number;
 
   deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
     let offset = 0;
@@ -32,31 +34,31 @@ export class SArray<
     return sum(this.map((element) => element.getSerializedLength(opts)));
   }
 
-  toJSON(): any {
+  toJSON() {
     return this.map(toJSON);
   }
 
   /** Create a new instance of this wrapper class from a raw value. */
-  static of<ValueT extends Serializable, WrapperT extends SArray<ValueT>>(
-    this: new () => WrapperT,
+  static of<ValueT extends Serializable, SArrayT extends SArray<ValueT>>(
+    this: new () => SArrayT,
     value: Array<ValueT>
-  ): WrapperT;
+  ): SArrayT;
   /** Returns an SArrayWithWrapper class that wraps elements with the provided
    * SerializableWrapper. */
-  static of<WrapperT extends SerializableWrapper<any>>(
-    wrapperType: new () => WrapperT
-  ): ReturnType<typeof createSArrayWithWrapperClass<WrapperT>>;
-  static of<ValueT, WrapperT extends SerializableWrapper<ValueT>>(
-    valueOrWrapperType: Array<ValueT> | (new () => WrapperT)
+  static of<ValueT>(
+    wrapperType: new () => SerializableWrapper<ValueT>
+  ): ReturnType<typeof createSArrayWithWrapperClass<ValueT>>;
+  static of<ValueT>(
+    arg: Array<ValueT> | (new () => SerializableWrapper<ValueT>)
   ) {
-    if (Array.isArray(valueOrWrapperType)) {
-      return super.of(valueOrWrapperType);
+    if (Array.isArray(arg)) {
+      return super.of(arg);
     }
     if (
-      typeof valueOrWrapperType === 'function' &&
-      valueOrWrapperType.prototype instanceof SerializableWrapper
+      typeof arg === 'function' &&
+      arg.prototype instanceof SerializableWrapper
     ) {
-      return createSArrayWithWrapperClass(valueOrWrapperType);
+      return createSArrayWithWrapperClass<ValueT>(arg);
     }
     throw new Error(
       'SArray.of() should be invoked either with an array of Serializable ' +
@@ -64,9 +66,25 @@ export class SArray<
     );
   }
 
-  private map<FnT extends (element: ValueT, index: number) => any>(
+  static ofLength<ValueT extends Serializable>(
+    length: number,
+    elementType: new () => ValueT
+  ) {
+    return class extends SArray<ValueT> {
+      value = times(length, () => new elementType());
+      length = length;
+    };
+  }
+
+  map<FnT extends (element: ValueT, index: number) => any>(
     fn: FnT
   ): Array<ReturnType<FnT>> {
+    if (this.length !== undefined && this.value.length !== this.length) {
+      throw new Error(
+        'SArray value has invalid length: ' +
+          `expected ${this.length}, but value has length ${this.value.length}`
+      );
+    }
     return this.value.map((element, index) => {
       try {
         return fn(element, index);
@@ -88,24 +106,32 @@ export class SArray<
   }
 }
 
-function createSArrayWithWrapperClass<
-  WrapperT extends SerializableWrapper<any>
->(wrapperType: new () => WrapperT) {
-  return class extends SArrayWithWrapper<WrappedValueT<WrapperT>, WrapperT> {
+function createSArrayWithWrapperClass<ValueT>(
+  wrapperType: new () => SerializableWrapper<ValueT>,
+  length?: number
+) {
+  return class extends SArrayWithWrapper<ValueT> {
+    value = times(length ?? 0, () => new wrapperType().value);
     wrapperType = wrapperType;
+    length = length;
+
+    static ofLength(length: number) {
+      return createSArrayWithWrapperClass<ValueT>(wrapperType, length);
+    }
   };
 }
 
 /** SArray variant that wraps each element for serialization / deserialization.
  */
-export abstract class SArrayWithWrapper<
-  ValueT,
-  WrapperT extends SerializableWrapper<ValueT>
-> extends SerializableWrapper<Array<ValueT>> {
+export abstract class SArrayWithWrapper<ValueT> extends SerializableWrapper<
+  Array<ValueT>
+> {
   /** Array of unwrapped values. */
   value: Array<ValueT> = [];
   /** Wrapper type constructor. */
-  abstract wrapperType: new () => WrapperT;
+  abstract readonly wrapperType: new () => SerializableWrapper<ValueT>;
+  /** Fixed size, or undefined if dynamically sized. */
+  readonly length?: number;
 
   deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
     const array = this.toSArray();
@@ -130,13 +156,13 @@ export abstract class SArrayWithWrapper<
     return this.toSArray().toJSON();
   }
 
-
   /** Constructs an SArray of wrappers around the current array of elements. */
   toSArray() {
-    if (!this.value.map) {
-      console.error('this.value.map is not a function: ' + this.value);
-    }
-    return SArray.of(
+    const cls =
+      this.length === undefined
+        ? SArray
+        : SArray.ofLength(this.length, this.wrapperType);
+    return cls.of(
       this.value.map((element) => {
         const wrapper = new this.wrapperType();
         wrapper.value = element;
