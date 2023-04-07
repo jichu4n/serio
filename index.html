@@ -198,11 +198,10 @@ combined with wrapper classes such as <code>SUInt32LE</code> and <code>SStringNT
 <a href="#fixed-sized-arrays" id="fixed-sized-arrays" style="color: inherit; text-decoration: none;">
   <h3>Fixed sized arrays</h3>
 </a>
-<p><a href="https://jichu4n.github.io/serio/classes/SArray.html#ofLength">SArray.ofLength(N)</a>
-and
-<a href="https://jichu4n.github.io/serio/classes/SArrayWithWrapper.html#ofLength">SArray.of(wrapperType).ofLength(N)</a>
+<p><a href="https://jichu4n.github.io/serio/classes/SArray.html#ofLength"><code>SArray.ofLength(N, elementType)</code></a> and
+<a href="https://jichu4n.github.io/serio/classes/SArrayWithWrapper.html#ofLength"><code>SArray.of(wrapperType).ofLength(N)</code></a>
 can be used to represent fixed size arrays, equivalent to C arrays
-(<code>elementType[N]</code>). An instance of <code>SArray.ofLength(N)</code> or
+(<code>elementType[N]</code>). An instance of <code>SArray.ofLength(N, elementType)</code> or
 <code>SArray.of(wrapperType).ofLength(N)</code> will pad / truncate the array to size N
 during serialization and deserialization.</p>
 <p>Example usage:</p>
