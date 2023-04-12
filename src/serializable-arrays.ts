@@ -23,7 +23,7 @@ export class SArray<ValueT extends Serializable> extends SerializableWrapper<
 
   deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
     let offset = 0;
-    this.map((element, index) => {
+    mapSArray(this, (element, index) => {
       offset += element.deserialize(buffer.slice(offset), opts);
       if (index >= this.value.length) {
         this.value.push(element);
@@ -33,15 +33,15 @@ export class SArray<ValueT extends Serializable> extends SerializableWrapper<
   }
 
   serialize(opts?: SerializeOptions): Buffer {
-    return Buffer.concat(this.map((element) => element.serialize(opts)));
+    return Buffer.concat(mapSArray(this, (element) => element.serialize(opts)));
   }
 
   getSerializedLength(opts?: SerializeOptions): number {
-    return sum(this.map((element) => element.getSerializedLength(opts)));
+    return sum(mapSArray(this, (element) => element.getSerializedLength(opts)));
   }
 
-  toJSON() {
-    return this.map(toJSON);
+  toJSON(): Array<any> {
+    return mapSArray(this, toJSON);
   }
 
   /** Create a new instance of this wrapper class from a raw value. */
@@ -83,47 +83,55 @@ export class SArray<ValueT extends Serializable> extends SerializableWrapper<
       elementType = elementType;
     };
   }
-
-  /** Applys the provided function over the elements of the array, subject to
-   * padding / truncation. */
-  map<FnT extends (element: ValueT, index: number) => any>(
-    fn: FnT
-  ): Array<ReturnType<FnT>> {
-    let elements: Array<ValueT>;
-    if (this.length !== undefined && this.value.length < this.length) {
-      elements = [
-        ...this.value,
-        ...times(
-          this.length - this.value.length,
-          () => new this.elementType!()
-        ),
-      ];
-    } else if (this.length !== undefined && this.value.length > this.length) {
-      elements = this.value.slice(0, this.length);
-    } else {
-      elements = this.value;
-    }
-    return elements.map((element, index) => {
-      try {
-        return fn(element, index);
-      } catch (e) {
-        if (e instanceof Error) {
-          const e2 = new SArrayError(
-            `Error at element ${index}: ${e.message}`,
-            {cause: e}
-          );
-          e2.stack = e.stack;
-          e2.element = element;
-          e2.index = index;
-          throw e2;
-        } else {
-          throw e;
-        }
-      }
-    });
-  }
 }
 
+/** Applys the provided function over the elements of an SArray, subject to
+ * padding / truncation.
+ *
+ * This should really be a private method of SArray, but TypeScript doesn't
+ * allow classes with anonymous child classes to contain private methods.
+ */
+function mapSArray<
+  ValueT extends Serializable,
+  FnT extends (element: ValueT, index: number) => any
+>(sarray: SArray<ValueT>, fn: FnT): Array<ReturnType<FnT>> {
+  let elements: Array<ValueT>;
+  if (sarray.length !== undefined && sarray.value.length < sarray.length) {
+    elements = [
+      ...sarray.value,
+      ...times(
+        sarray.length - sarray.value.length,
+        () => new sarray.elementType!()
+      ),
+    ];
+  } else if (
+    sarray.length !== undefined &&
+    sarray.value.length > sarray.length
+  ) {
+    elements = sarray.value.slice(0, sarray.length);
+  } else {
+    elements = sarray.value;
+  }
+  return elements.map((element, index) => {
+    try {
+      return fn(element, index);
+    } catch (e) {
+      if (e instanceof Error) {
+        const e2 = new SArrayError(`Error at element ${index}: ${e.message}`, {
+          cause: e,
+        });
+        e2.stack = e.stack;
+        e2.element = element;
+        e2.index = index;
+        throw e2;
+      } else {
+        throw e;
+      }
+    }
+  });
+}
+
+/** Returns an SArrayWithWrapperClass child class with the given parameters. */
 function createSArrayWithWrapperClass<ValueT>(
   wrapperType: new () => SerializableWrapper<ValueT>,
   length?: number
