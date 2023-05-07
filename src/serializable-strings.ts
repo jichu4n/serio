@@ -12,7 +12,7 @@ export class SStringNT extends SerializableWrapper<string> {
     let reader: SmartBuffer;
     let readOffset: number;
     if (this.length) {
-      reader = SmartBuffer.fromBuffer(buffer.slice(0, this.length));
+      reader = SmartBuffer.fromBuffer(buffer.subarray(0, this.length));
       this.value = decodeString(reader.readBufferNT(), opts);
       readOffset = reader.length;
     } else {
@@ -28,7 +28,7 @@ export class SStringNT extends SerializableWrapper<string> {
     let writer: SmartBuffer;
     if (this.length) {
       writer = SmartBuffer.fromBuffer(Buffer.alloc(this.length));
-      writer.writeBufferNT(encodedValue.slice(0, this.length - 1));
+      writer.writeBufferNT(encodedValue.subarray(0, this.length - 1));
     } else {
       writer = new SmartBuffer();
       writer.writeBufferNT(encodedValue);
@@ -59,7 +59,7 @@ export class SString extends SerializableWrapper<string> {
 
   deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
     if (this.length) {
-      buffer = buffer.slice(0, this.length);
+      buffer = buffer.subarray(0, this.length);
     }
     this.value = decodeString(buffer, opts);
     return buffer.length;
@@ -70,7 +70,7 @@ export class SString extends SerializableWrapper<string> {
     let writer: SmartBuffer;
     if (this.length) {
       writer = SmartBuffer.fromBuffer(Buffer.alloc(this.length));
-      writer.writeBuffer(encodedValue.slice(0, this.length));
+      writer.writeBuffer(encodedValue.subarray(0, this.length));
     } else {
       writer = new SmartBuffer();
       writer.writeBuffer(encodedValue);

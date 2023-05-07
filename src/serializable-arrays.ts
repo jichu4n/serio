@@ -24,7 +24,7 @@ export class SArray<ValueT extends Serializable> extends SerializableWrapper<
   deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
     let offset = 0;
     mapSArray(this, (element, index) => {
-      offset += element.deserialize(buffer.slice(offset), opts);
+      offset += element.deserialize(buffer.subarray(offset), opts);
       if (index >= this.value.length) {
         this.value.push(element);
       }

@@ -117,7 +117,7 @@ describe('SObject', function () {
       );
       expect(
         Buffer.from(
-          obj1.serialize().slice(0, obj1.fullName.value.length)
+          obj1.serialize().subarray(0, obj1.fullName.value.length)
         ).toString()
       ).toStrictEqual('Jane Doe');
     });
@@ -133,7 +133,7 @@ describe('SObject', function () {
       );
       expect(
         Buffer.from(
-          obj2.serialize().slice(0, obj2.fullName.value.length)
+          obj2.serialize().subarray(0, obj2.fullName.value.length)
         ).toString()
       ).toStrictEqual('Jane Doe');
     });

@@ -29,7 +29,7 @@ export abstract class SDynamicBuffer<
   deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
     const length = new this.lengthType();
     let readOffset = length.deserialize(buffer, opts);
-    this.value = buffer.slice(readOffset, readOffset + length.value);
+    this.value = buffer.subarray(readOffset, readOffset + length.value);
     return readOffset + length.value;
   }
 

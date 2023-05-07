@@ -49,7 +49,7 @@ const pos1 = new Position();
 // ...or with a set of initial values (can be partial):
 const pos2 = Position.with({x: 5, y: 0});
 // ...or by deserializing from an existing Buffer:
-const pos3 = Position.from(buffer.slice(...));
+const pos3 = Position.from(buffer.subarray(...));
 
 
 // Fields can be manipulated normally:
@@ -62,7 +62,7 @@ const buf = pos1.serialize(); // => Buffer
 // Get the byte size of the instance's serialized form:
 const size = pos1.getSerializedLength();  // => 8
 // Deserialize into an existing instance, returning number of bytes red
-const bytesRead = pos1.deserialize(buffer.slice(...));  // => 8
+const bytesRead = pos1.deserialize(buffer.subarray(...));  // => 8
 ```
 
 ## Serializable
@@ -78,7 +78,7 @@ Example usage of a `Serializable` class `X`:
 // Create an instance using default values:
 const obj1 = new X();
 // Create an instance by decoding from Buffer:
-const obj2 = X.from(buffer.slice(...));
+const obj2 = X.from(buffer.subarray(...));
 
 // Serialize to Buffer:
 const buffer = obj1.serialize(); // => Buffer
@@ -102,7 +102,7 @@ const v1 = new SUInt32LE();
 // ...with an initial value:
 const v2 = SUInt32LE.of(100);
 // ...by decoding from a Buffer:
-const v3 = SUInt32LE.from(buffer.slice(...));
+const v3 = SUInt32LE.from(buffer.subarray(...));
 
 // Manipulate the wrapped value:
 v1.value = 100;
@@ -176,9 +176,9 @@ const str1 = new SStringNT();
 // ...with an initial value:
 const str2 = SStringNT.of('hello world!');
 // ...by decoding from a buffer using the default encoding (UTF-8):
-const str3 = SStringNT.from(buffer.slice(...));
+const str3 = SStringNT.from(buffer.subarray(...));
 // ...by decoding from a buffer using a different encoding:
-const str4 = SStringNT.from(buffer.slice(...), {encoding: 'gb2312'});
+const str4 = SStringNT.from(buffer.subarray(...), {encoding: 'gb2312'});
 
 // Manipulate the wrapped value:
 str1.value = 'foo bar';
@@ -188,9 +188,9 @@ const buf1 = str1.serialize();
 // ...or using a different encoding:
 const buf2 = str1.serialize({encoding: 'win1251'});
 // Deserialize from a Buffer using the default encoding:
-str1.deserialize(buffer.slice(...));
+str1.deserialize(buffer.subarray(...));
 // ...or using a different encoding:
-str1.deserialize(buffer.slice(...), {encoding: 'win1251'});
+str1.deserialize(buffer.subarray(...), {encoding: 'win1251'});
 
 const size = SStringNT.of('hi').getSerializedLength(); // => 3
 const size = SString.of('hi').getSerializedLength(); // => 2
@@ -224,7 +224,7 @@ const str1 = new (SStringNT().ofLength(5))();
 // ...with an initial value:
 const str2 = SStringNT.ofLength(5).of('hello world!');
 // ...by decoding from a buffer using the default encoding (UTF-8):
-const str3 = SStringNT.ofLength(5).from(buffer.slice(...));
+const str3 = SStringNT.ofLength(5).from(buffer.subarray(...));
 
 // Manipulate the wrapped value:
 str1.value = 'foo bar';
@@ -406,7 +406,7 @@ const pos1 = new Position();
 // ...or with a set of initial values (can be partial):
 const pos2 = Position.with({x: 5, y: 0});
 // ...or by deserializing from an existing Buffer:
-const pos3 = Position.from(buffer.slice(...));
+const pos3 = Position.from(buffer.subarray(...));
 
 
 // Fields can be manipulated normally:
@@ -419,7 +419,7 @@ const buf = pos1.serialize(); // => Buffer
 // Get the byte size of the instance's serialized form:
 const size = pos1.getSerializedLength();  // => 8
 // Deserialize into an existing instance, returning number of bytes red
-const bytesRead = pos1.deserialize(buffer.slice(...));  // => 8
+const bytesRead = pos1.deserialize(buffer.subarray(...));  // => 8
 ```
 
 A more advanced example showing nesting, `@field()`, and wrapping getter / setters:
@@ -584,7 +584,7 @@ class MyType extends Serializable {
   /** Deserializes a buffer into this value. */
   deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
     this.x = buffer.readUInt8(0);
-    this.name.deserialize(buffer.slice(1), opts);
+    this.name.deserialize(buffer.subarray(1), opts);
     return this.getSerializedLength(opts);
   }
   /** Computes the serialized length of this value. */
