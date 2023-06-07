@@ -422,26 +422,13 @@ const size = pos1.getSerializedLength();  // => 8
 const bytesRead = pos1.deserialize(buffer.subarray(...));  // => 8
 ```
 
-A more advanced example showing nesting, `@field()`, and wrapping getter / setters:
+A more advanced example showing `@field()` with getter / setters:
 
 ```ts
-/** A class that maps to the following C struct:
- *
- *      struct Point {
- *          Position position;
- *          uint8_t color;
- *          char[31] label;
- *      };
- *
- *  ...where `color` is an 8-bit color in the format RRR GG BB (see
+/** A class that implements 8-bit color in the format RRR GG BB (see
  *  https://en.wikipedia.org/wiki/8-bit_color).
  */
-class Point {
-  // Since Position is itself a Serializable object, we use @field() with
-  // no arguments.
-  @field()
-  position = new Position();
-
+class Color extends SObject {
   // We expose red, green and blue component values as separate properties to
   // make them easy to manipulate.
   red = 0;
@@ -452,26 +439,20 @@ class Point {
   // encodes red / green / blue components as an 8-bit color value in the
   // format RRR GGG BB.
   @field(SUInt8)
-  get color() {
+  get value() {
     return (
       ((this.red & 0x07) << 5) | (this.green & (0x07 << 2)) | (this.blue & 0x03)
     );
   }
-  set color(v: number) {
+  set value(v: number) {
     this.red = (v >> 5) & 0x07;
     this.green = (v >> 2) & 0x07;
     this.blue = v & 0x03;
   }
-
-  @field(SStringNT.ofLength(31))
-  label = '';
 }
-
-// Serialization / deserialization options are passed through to fields.
-const obj1 = Point.with({label: '你好'});
-obj1.serialize({encoding: 'gb2312'});
-obj1.deserialize(buffer, {encoding: 'gb2312'});
 ```
+
+However, note that **you should avoid using `@field()` with both regular properties and getters / setters in the same class**. This is because decorator initializers for getters / setters always run before regular properties, so if a class contains a mixure of decorated properties and decorated getters / setters, the resulting serialization order will likely be different from the declaration order in the code.
 
 Example combining objects and arrays:
 
@@ -561,6 +542,8 @@ console.log(bm1.toJSON()); // => {flag1: true, flag2: true, unused: 0}
 bm1.flag1 = false;
 bm1.serialize(); // => Buffer.of(0b01000000)
 ```
+
+Similar to `@field()`, you can also use `@bitfield()` with getters / setters, but you should avoid using `@bitfield()` with both getters / setters and regular properties in the same class.
 
 ## Creating new `Serializable` classes
 
