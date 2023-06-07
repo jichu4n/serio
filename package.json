@@ -1,6 +1,6 @@
 {
   "name": "serio",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Fluent binary serialization / deserialization in TypeScript",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
