@@ -13,8 +13,8 @@ import {toJSON} from './utils';
 /** Serializable record where fields are defined via `@field()`. */
 export class SObject extends Serializable {
   deserialize(buffer: Buffer, opts?: DeserializeOptions): number {
-    const array = this.toSArray();
-    const readOffset = this.wrapSArrayErrorAsSObjectError(() =>
+    const array = toSArray(this);
+    const readOffset = wrapSArrayErrorAsSObjectError(this, () =>
       array.deserialize(buffer, opts)
     );
     const fieldSpecs = getFieldSpecs(this);
@@ -30,25 +30,35 @@ export class SObject extends Serializable {
   }
 
   serialize(opts?: SerializeOptions): Buffer {
-    return this.wrapSArrayErrorAsSObjectError(() =>
-      this.toSArray().serialize(opts)
+    return wrapSArrayErrorAsSObjectError(this, () =>
+      toSArray(this).serialize(opts)
     );
   }
 
   getSerializedLength(opts?: SerializeOptions): number {
-    return this.wrapSArrayErrorAsSObjectError(() =>
-      this.toSArray().getSerializedLength(opts)
+    return wrapSArrayErrorAsSObjectError(this, () =>
+      toSArray(this).getSerializedLength(opts)
     );
   }
 
   toJSON(): any {
-    return mapValues(this.mapValuesToSerializable(), (value, propertyKey) => {
-      try {
-        return toJSON(value);
-      } catch (e: any) {
-        throw new SObjectError(propertyKey, e);
-      }
-    });
+    const serializableFields = this.mapValuesToSerializable();
+    return Object.fromEntries(
+      Object.entries(this).map(([propertyKey, value]) => {
+        try {
+          return [
+            propertyKey,
+            toJSON(
+              propertyKey in serializableFields
+                ? serializableFields[propertyKey]
+                : value
+            ),
+          ];
+        } catch (e: any) {
+          throw new SObjectError(propertyKey, e);
+        }
+      })
+    );
   }
 
   /** Create a new instance with the provided initial properties. */
@@ -101,29 +111,33 @@ export class SObject extends Serializable {
       }
     }
   }
+}
 
-  /** Converts this object to an SArray of serializable field values. */
-  private toSArray(): SArray<Serializable> {
-    return SArray.of(
-      getFieldSpecs(this).map((fieldSpec) => getFieldOrWrapper(this, fieldSpec))
-    );
-  }
+/** Converts this object to an SArray of serializable field values. */
+function toSArray(targetInstance: SObject): SArray<Serializable> {
+  return SArray.of(
+    getFieldSpecs(targetInstance).map((fieldSpec) =>
+      getFieldOrWrapper(targetInstance, fieldSpec)
+    )
+  );
+}
 
-  private wrapSArrayErrorAsSObjectError<FnT extends () => any>(
-    fn: FnT
-  ): ReturnType<FnT> {
-    try {
-      return fn();
-    } catch (e) {
-      if (e instanceof SArrayError) {
-        const propertyKey = getFieldSpecs(this)[e.index].propertyKey.toString();
-        // @ts-ignore
-        const cause: Error = e.cause;
-        const e2 = new SObjectError(propertyKey, cause);
-        throw e2;
-      } else {
-        throw e;
-      }
+function wrapSArrayErrorAsSObjectError<FnT extends () => any>(
+  targetInstance: SObject,
+  fn: FnT
+): ReturnType<FnT> {
+  try {
+    return fn();
+  } catch (e) {
+    if (e instanceof SArrayError) {
+      const propertyKey =
+        getFieldSpecs(targetInstance)[e.index].propertyKey.toString();
+      // @ts-ignore
+      const cause: Error = e.cause;
+      const e2 = new SObjectError(propertyKey, cause);
+      throw e2;
+    } else {
+      throw e;
     }
   }
 }

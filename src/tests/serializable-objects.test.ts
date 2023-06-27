@@ -154,10 +154,10 @@ describe('SObject', function () {
     });
 
     const obj2 = TestObjectB.with({firstName: 'Jane', lastName: 'Doe'});
-    expect(obj2.toJSON()).toStrictEqual({fullName: 'Jane Doe'});
-
-    const obj3 = TestObjectB.with({firstName: 'Jane', lastName: 'Doe'});
-    expect(obj3.toJSON()).toStrictEqual({fullName: 'Jane Doe'});
+    expect(obj2.toJSON()).toStrictEqual({
+      firstName: 'Jane',
+      lastName: 'Doe',
+    });
   });
 
   test('error handling', function () {
