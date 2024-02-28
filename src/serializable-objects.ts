@@ -1,5 +1,3 @@
-import fromPairs from 'lodash/fromPairs';
-import mapValues from 'lodash/mapValues';
 import {
   DeserializeOptions,
   SArray,
@@ -74,7 +72,7 @@ export class SObject extends Serializable {
    * `@field(wrapper)` are wrapped in their respective wrapper types.
    */
   mapValuesToSerializable(): {[propertyKey: string]: Serializable} {
-    return fromPairs(
+    return Object.fromEntries(
       getFieldSpecs(this).map((fieldSpec) => [
         fieldSpec.propertyKey,
         getFieldOrWrapper(this, fieldSpec),

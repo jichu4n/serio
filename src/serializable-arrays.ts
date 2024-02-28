@@ -1,5 +1,3 @@
-import sum from 'lodash/sum';
-import times from 'lodash/times';
 import {
   DeserializeOptions,
   Serializable,
@@ -37,7 +35,9 @@ export class SArray<ValueT extends Serializable> extends SerializableWrapper<
   }
 
   getSerializedLength(opts?: SerializeOptions): number {
-    return sum(mapSArray(this, (element) => element.getSerializedLength(opts)));
+    return mapSArray(this, (element) =>
+      element.getSerializedLength(opts)
+    ).reduce((a, b) => a + b, 0);
   }
 
   toJSON(): Array<any> {
@@ -78,7 +78,9 @@ export class SArray<ValueT extends Serializable> extends SerializableWrapper<
     elementType: new () => ValueT
   ) {
     return class extends SArray<ValueT> {
-      value = times(length, () => new elementType());
+      value = Array(length)
+        .fill(0)
+        .map(() => new elementType());
       length = length;
       elementType = elementType;
     };
@@ -99,10 +101,9 @@ function mapSArray<
   if (sarray.length !== undefined && sarray.value.length < sarray.length) {
     elements = [
       ...sarray.value,
-      ...times(
-        sarray.length - sarray.value.length,
-        () => new sarray.elementType!()
-      ),
+      ...Array(sarray.length - sarray.value.length)
+        .fill(0)
+        .map(() => new sarray.elementType!()),
     ];
   } else if (
     sarray.length !== undefined &&
@@ -137,7 +138,9 @@ function createSArrayWithWrapperClass<ValueT>(
   length?: number
 ) {
   return class extends SArrayWithWrapper<ValueT> {
-    value = times(length ?? 0, () => new wrapperType().value);
+    value = Array(length ?? 0)
+      .fill(0)
+      .map(() => new wrapperType().value);
     wrapperType = wrapperType;
     length = length;
 

@@ -1,5 +1,3 @@
-import sum from 'lodash/sum';
-import fromPairs from 'lodash/fromPairs';
 import {SerializableWrapper} from './';
 import {DeserializeOptions, SerializeOptions} from './serializable';
 
@@ -95,7 +93,7 @@ export abstract class SBitmask extends SerializableWrapper<number> {
   }
 
   toJSON(): any {
-    return fromPairs(
+    return Object.fromEntries(
       getSBitfieldSpecs(this).map(({propertyKey}) => [
         propertyKey,
         (this as any)[propertyKey],
@@ -211,7 +209,9 @@ function validateLength(
   expectedLength: number
 ) {
   const expectedBitLength = expectedLength * 8;
-  const totalBitLength = sum(bitfields.map(({length}) => length));
+  const totalBitLength = bitfields
+    .map(({length}) => length)
+    .reduce((a, b) => a + b, 0);
   if (totalBitLength !== expectedBitLength) {
     throw new Error(
       'Total length of bitfields do not match bitmask length: ' +
