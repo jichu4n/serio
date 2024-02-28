@@ -1,4 +1,4 @@
-import {Serializable} from '.';
+import {Serializable} from './serializable';
 import {toJSON} from './utils';
 
 /** Serializable implementation that simply wraps another value. */

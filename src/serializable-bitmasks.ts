@@ -1,5 +1,5 @@
-import {SerializableWrapper} from './';
 import {DeserializeOptions, SerializeOptions} from './serializable';
+import {SerializableWrapper} from './serializable-wrapper';
 
 /** A numeric value that represents a bitmask of several fields.*/
 export abstract class SBitmask extends SerializableWrapper<number> {

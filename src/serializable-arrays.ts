@@ -1,9 +1,9 @@
 import {
   DeserializeOptions,
   Serializable,
-  SerializableWrapper,
   SerializeOptions,
-} from '.';
+} from './serializable';
+import {SerializableWrapper} from './serializable-wrapper';
 import {toJSON} from './utils';
 
 /** A Serializable that represents a concatenation of other Serializables. */

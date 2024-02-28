@@ -1,11 +1,10 @@
 import {
   DeserializeOptions,
-  SArray,
-  SArrayError,
   Serializable,
-  SerializableWrapper,
   SerializeOptions,
-} from '.';
+} from './serializable';
+import {SArray, SArrayError} from './serializable-arrays';
+import {SerializableWrapper} from './serializable-wrapper';
 import {toJSON} from './utils';
 
 /** Serializable record where fields are defined via `@field()`. */

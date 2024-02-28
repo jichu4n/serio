@@ -1,4 +1,5 @@
-import {DeserializeOptions, SerializableWrapper, SerializeOptions} from '.';
+import {DeserializeOptions, SerializeOptions} from './serializable';
+import {SerializableWrapper} from './serializable-wrapper';
 
 /** No-op Serializable implementation that serializes to / from Buffers. */
 export class SBuffer extends SerializableWrapper<Buffer> {
