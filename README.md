@@ -149,6 +149,8 @@ class MyObject extends SObject {
 }
 
 JSON.stringify(new MyObject()); // => {"type": "FOO"}
+JSON.stringify(MyObject.with({type: MyType.FOO})); // => {"type": "FOO"}
+JSON.stringify(MyObject.with({type: 'FOO'})); // => {"type": "FOO"}
 ```
 
 ## Strings
@@ -396,10 +398,12 @@ class Position extends SObject {
   @field(SUInt32LE)
   y = 0;
 
-  // Properties without a decorator are ignored for serialization.
+  // Properties without a decorator are ignored for serialization, but will
+  // be included in JSON output by default (JSON.stringify(obj) or obj.toJSON()).
+  // Use `@json(false)` to exclude them.
+  @json(false)
   foo = 100;
 }
-
 
 // Create instance with default values:
 const pos1 = new Position();
@@ -408,11 +412,9 @@ const pos2 = Position.with({x: 5, y: 0});
 // ...or by deserializing from an existing Buffer:
 const pos3 = Position.from(buffer.subarray(...));
 
-
 // Fields can be manipulated normally:
 pos1.x = 5;
 pos1.y = pos1.x + 10;
-
 
 // Serialize to Buffer:
 const buf = pos1.serialize(); // => Buffer
@@ -439,6 +441,9 @@ class Color extends SObject {
   // encodes red / green / blue components as an 8-bit color value in the
   // format RRR GGG BB.
   @field(SUInt8)
+  // Getters / setters aren't included by default in JSON output
+  // (JSON.stringify(obj) or obj.toJSON()). Use `@json(true)` to include them.
+  @json(true)
   get value() {
     return (
       ((this.red & 0x07) << 5) | (this.green & (0x07 << 2)) | (this.blue & 0x03)
@@ -452,7 +457,13 @@ class Color extends SObject {
 }
 ```
 
-However, note that **you should avoid using `@field()` with both regular properties and getters / setters in the same class**. This is because decorator initializers for getters / setters always run before regular properties, so if a class contains a mixure of decorated properties and decorated getters / setters, the resulting serialization order will likely be different from the declaration order in the code.
+However, note that you should **avoid using `@field()` with both regular
+properties and getters / setters in the same `SObject` class**. This is due to a
+quirk in the ES6 decorator spec: decorator initializers for getters / setters
+always run before regular properties, so if a class contains a mixure of
+decorated properties and decorated getters / setters, the resulting
+serialization order will likely be different from the declaration order in the
+code.
 
 Example combining objects and arrays:
 
@@ -479,6 +490,30 @@ class ExampleObject extends SObject {
 // Equivalent C: ExampleObject[5]
 const arr1 = SArray.of(_.times(5, () => new ExampleObject()));
 console.log(arr1.value[0].prop3[0][0]); // => 'hello'
+```
+
+Example showing JSON conversion:
+
+```ts
+class Segment extends SObject {
+  @field()
+  p1 = new Point();
+  @field()
+  p2 = new Point();
+}
+// Initialize with point instances
+const s1 = Segment.with({
+  p1: Point.with({x: 1, y: 1}),
+  p2: Point.with({x: 2, y: 2}),
+});
+// Initialize with JSON
+const s2 = Segment.with({
+  p1: {x: 1, y: 1},
+  p2: {x: 2, y: 2},
+});
+// Partial update with JSON
+s2.assignJSON({p2: {x: 10}});
+console.log(s2.toJSON()); // => {p1: {x: 1, y: 1}, p2: {x: 10, y: 2}}
 ```
 
 ## Bitmasks
@@ -633,3 +668,20 @@ class SomeObject extends SObject {
 ## About
 
 serio is distributed under the Apache License v2.
+
+## Changelog
+
+### 2.0.0
+
+- Introduce `assignJSON()` to most `Serializable` classes. This greatly simplies
+  the construction of nested `SObject`, `SArray` and other serializable values.
+  - `SObject.with()` now take advantages of `assignJSON()`, allowing inline
+    construction of nested `SObject`s through JSON or raw JS values.
+- Introduce the `@json(boolean)` annotation to simplify customization of JSON
+  output.
+- **Breaking change**: `SObject.assignFromSerializable()` has been renamed to
+  `SObject.assignSerializableMap()` for consistency with `assignJSON()`, and
+  passing in unknown properties in the argument will now throw an error instead
+  of being silently ignored.
+- **Breaking change**: `SObject.mapValuesToSerializable()` has been renamed to
+  `SObject.toSerializableMap()` for consistency with `toJSON()`.
