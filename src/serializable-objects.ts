@@ -1,3 +1,4 @@
+import {get} from 'lodash';
 import {
   DeserializeOptions,
   Serializable,
@@ -101,7 +102,17 @@ export class SObject extends Serializable {
    *
    * Conceptually equivalent to Object.assign(), but recursively hydrates
    * SObjects / SArrays / SerializableWrappers etc and invokes their
-   * assignJSON() to process JSON values.
+   * assignJSON() to process JSON values. For example:
+   * ```
+   * class A extends SObject {
+   *   @field(SUInt8) prop1: number;
+   * }
+   * class B extends SObject {
+   *   @field() a = new A();
+   * }
+   * const b1 = new B();
+   * b1.assignJSON({a: {prop1: 300}});
+   * ```
    */
   assignJSON(jsonObject: {[key: string | symbol]: unknown}) {
     if (typeof jsonObject !== 'object' || jsonObject === null) {
@@ -153,22 +164,30 @@ export class SObject extends Serializable {
    * Conceptually equivalent to Object.assign(), but automatically unwraps
    * wrapped properties. Fields defined with `@field()` are directly assigned,
    * and fields defined with `@field(wrapper)` are assigned by unwrapping the
-   * corresponding SerializableWrapper. Unknown fields are ignored.
+   * corresponding SerializableWrapper. Unknown fields are considered an error.
    */
-  assignFromSerializable(serializableMap: {
-    [propertyKey: string]: Serializable;
+  assignSerializableMap(serializableMap: {
+    [propertyKey: string | symbol]: Serializable;
   }) {
-    for (const {propertyKey, wrapperType} of getFieldSpecs(this)) {
-      const serializableValue = serializableMap[propertyKey.toString()];
-      if (!serializableValue) {
-        continue;
+    const fieldSpecMap = getFieldSpecMap(this);
+    for (const [propertyKey, serializableValue] of Object.entries(
+      serializableMap
+    )) {
+      const fieldSpec = fieldSpecMap[propertyKey];
+      if (!fieldSpec) {
+        throw new SObjectError(
+          propertyKey,
+          new Error(`Unknown property ${propertyKey}`)
+        );
       }
-      if (wrapperType) {
+      if (fieldSpecMap.wrapperType) {
         if (!(serializableValue instanceof SerializableWrapper)) {
-          throw new Error(
-            `Error in field ${propertyKey.toString()}: ` +
-              `expected SerializableWrapper in assignment, ` +
-              `got ${typeof serializableValue} (${toJSON(serializableValue)})`
+          throw new SObjectError(
+            propertyKey.toString(),
+            new Error(
+              `Expected SerializableWrapper in assignment, ` +
+                `got ${typeof serializableValue}`
+            )
           );
         }
         (this as any)[propertyKey] = serializableValue.value;
