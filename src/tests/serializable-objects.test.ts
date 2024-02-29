@@ -55,7 +55,7 @@ class TestObjectC extends SObject {
   objectB: TestObjectB = new TestObjectB();
 }
 
-/** Example object with JSON setting annotations. */
+/** Example object with JSON setting decorators. */
 class TestObjectD extends SObject {
   prop1 = 0;
 
@@ -235,7 +235,7 @@ describe('SObject', function () {
     expect(() => obj3.assignJSON(null)).toThrow(Error);
   });
 
-  test('JSON setting annotations', function () {
+  test('JSON setting decorators', function () {
     const obj1 = TestObjectD.with({
       prop1: 1,
       prop2: 2,

@@ -678,11 +678,15 @@ serio is distributed under the Apache License v2.
   the construction of nested `SObject`, `SArray` and other serializable values.
   - `SObject.with()` now take advantages of `assignJSON()`, allowing inline
     construction of nested `SObject`s through JSON or raw JS values.
-- Introduce the `@json(boolean)` annotation to simplify customization of JSON
-  output.
+- Introduce the `@json(boolean)` decorator to simplify customization of JSON
+  output on `SObject` and `SBitmask` objects.
 - **Breaking change**: `SObject.assignFromSerializable()` has been renamed to
   `SObject.assignSerializableMap()` for consistency with `assignJSON()`, and
   passing in unknown properties in the argument will now throw an error instead
   of being silently ignored.
 - **Breaking change**: `SObject.mapValuesToSerializable()` has been renamed to
   `SObject.toSerializableMap()` for consistency with `toJSON()`.
+- **Breaking change**: `SBitmask.toJSON()` previously only returned fields
+  decorated with `@bitfield()`. Its behavior has been updated to be consistent
+  with `SObject.toJSON()`: it now returns all properties on the object, with
+  support for field-level control with `@json(boolean)`.
