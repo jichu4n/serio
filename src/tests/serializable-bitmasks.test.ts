@@ -93,7 +93,7 @@ describe('SBitmask', function () {
     }).toThrow();
   });
 
-  test('toJSON', function () {
+  test('JSON conversion', function () {
     expect(new Color8Bit().toJSON()).toStrictEqual({
       r: 0,
       g: 0,
@@ -106,5 +106,13 @@ describe('SBitmask', function () {
       g: 0b101,
       b: 0b01,
     });
+
+    const bm1 = new Color8Bit();
+    bm1.assignJSON({r: 0b100});
+    expect(bm1.toJSON()).toStrictEqual({r: 0b100, g: 0, b: 0});
+    bm1.assignJSON({});
+    expect(bm1.toJSON()).toStrictEqual({r: 0b100, g: 0, b: 0});
+    bm1.assignJSON(Color8Bit.with({r: 1, g: 2, b: 3}).serialize().at(0)!);
+    expect(bm1.toJSON()).toStrictEqual({r: 1, g: 2, b: 3});
   });
 });

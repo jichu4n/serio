@@ -127,4 +127,16 @@ describe('SString', function () {
       iconv.decode(str2.serialize({encoding: 'gb2312'}), 'gb2312')
     ).toStrictEqual('你好啊');
   });
+
+  test('JSON conversion', function () {
+    const str1 = SString.of('hello');
+    expect(str1.toJSON()).toStrictEqual('hello');
+    str1.assignJSON('world');
+    expect(str1.toJSON()).toStrictEqual('world');
+
+    const str2 = SStringNT.of('hello');
+    expect(str2.toJSON()).toStrictEqual('hello');
+    str2.assignJSON('world');
+    expect(str2.toJSON()).toStrictEqual('world');
+  });
 });

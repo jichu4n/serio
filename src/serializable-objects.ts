@@ -5,7 +5,7 @@ import {
 } from './serializable';
 import {SArray, SArrayError} from './serializable-arrays';
 import {SerializableWrapper} from './serializable-wrapper';
-import {toJSON} from './utils';
+import {shouldAssignJSON, toJSON} from './utils';
 
 /** Serializable record where fields are defined via `@field()`. */
 export class SObject extends Serializable {
@@ -58,10 +58,26 @@ export class SObject extends Serializable {
     );
   }
 
-  /** Create a new instance with the provided initial properties. */
-  static with<T extends SObject>(this: new () => T, props: Partial<T> = {}): T {
+  /** Create a new instance with the provided initial properties.
+   *
+   * This method uses assignJSON() to either assign or hydrate JSON values for
+   * nested Serializable values. For example, you can do the following:
+   * ```
+   * class A extends SObject {
+   *   @field(SUInt8) prop1: number;
+   * }
+   * class B extends SObject {
+   *   @field() a = new A();
+   * }
+   * const b = B.with({a: {prop1: 300}});
+   * ```
+   */
+  static with<T extends SObject>(
+    this: new () => T,
+    props: {[P in keyof T]?: T[P] | unknown} = {}
+  ): T {
     const instance = new this();
-    Object.assign(instance, props);
+    instance.assignJSON(props);
     return instance;
   }
 
@@ -77,6 +93,27 @@ export class SObject extends Serializable {
         getFieldOrWrapper(this, fieldSpec),
       ])
     );
+  }
+
+  /** Assign properties to this object from a JSON object.
+   *
+   * Conceptually equivalent to Object.assign(), but recursively hydrates
+   * SObjects / SArrays / SerializableWrappers etc from raw values.
+   */
+  assignJSON(jsonValue: {[key: string | symbol]: unknown}) {
+    if (typeof jsonValue !== 'object' || jsonValue === null) {
+      throw new Error(
+        `Expected object in SObject.assignJSON(), got ${typeof jsonValue}`
+      );
+    }
+    for (const [propertyKey, value] of Object.entries(jsonValue)) {
+      const currentValue = (this as any)[propertyKey] as unknown;
+      if (shouldAssignJSON(currentValue, value)) {
+        currentValue.assignJSON(value);
+      } else {
+        (this as any)[propertyKey] = value;
+      }
+    }
   }
 
   /** Assign properties to this object from a map of Serializables.

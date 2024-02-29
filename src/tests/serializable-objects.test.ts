@@ -47,16 +47,11 @@ class TestObjectB extends SObject {
 
 /** Example object that tests `field()` with accessors. */
 class TestObjectC extends SObject {
-  firstName: string = '';
-  lastName: string = '';
+  @field(SUInt8)
+  prop1 = 0;
 
-  @field(SStringNT)
-  get fullName() {
-    return `${this.firstName} ${this.lastName}`;
-  }
-  set fullName(fullName: string) {
-    [this.firstName, this.lastName] = fullName.split(' ');
-  }
+  @field()
+  objectB: TestObjectB = new TestObjectB();
 }
 
 /** Object that contains a ThrowingSerializable. */
@@ -139,7 +134,7 @@ describe('SObject', function () {
     });
   });
 
-  describe('toJSON', function () {
+  test('JSON conversion', function () {
     const obj1 = TestObjectA.with({
       prop1: SUInt8.of(100),
       prop2: 50,
@@ -158,6 +153,47 @@ describe('SObject', function () {
       firstName: 'Jane',
       lastName: 'Doe',
     });
+
+    const obj3 = TestObjectC.with({
+      prop1: 42,
+      objectB: {firstName: 'John', lastName: 'Doe'},
+    });
+    expect(obj3.toJSON()).toStrictEqual({
+      prop1: 42,
+      objectB: {
+        firstName: 'John',
+        lastName: 'Doe',
+      },
+    });
+    obj3.assignJSON({prop1: 100});
+    expect(obj3.toJSON()).toStrictEqual({
+      prop1: 100,
+      objectB: {
+        firstName: 'John',
+        lastName: 'Doe',
+      },
+    });
+    obj3.assignJSON({objectB: {firstName: 'Jane'}});
+    expect(obj3.toJSON()).toStrictEqual({
+      prop1: 100,
+      objectB: {
+        firstName: 'Jane',
+        lastName: 'Doe',
+      },
+    });
+    obj3.assignJSON({});
+    expect(obj3.toJSON()).toStrictEqual({
+      prop1: 100,
+      objectB: {
+        firstName: 'Jane',
+        lastName: 'Doe',
+      },
+    });
+
+    // @ts-expect-error
+    expect(() => obj3.assignJSON('not an object')).toThrow(Error);
+    // @ts-expect-error
+    expect(() => obj3.assignJSON(null)).toThrow(Error);
   });
 
   test('error handling', function () {

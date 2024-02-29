@@ -4,7 +4,7 @@ import {
   SerializeOptions,
 } from './serializable';
 import {SerializableWrapper} from './serializable-wrapper';
-import {toJSON} from './utils';
+import {shouldAssignJSON, toJSON} from './utils';
 
 /** A Serializable that represents a concatenation of other Serializables. */
 export class SArray<ValueT extends Serializable> extends SerializableWrapper<
@@ -42,6 +42,64 @@ export class SArray<ValueT extends Serializable> extends SerializableWrapper<
 
   toJSON(): Array<any> {
     return mapSArray(this, toJSON);
+  }
+
+  /** Assigns elements from a JSON array.
+   *
+   * Conceptually equivalent to assigning to this.values directly, but
+   * recursively hydrates SObjects / SArrays / SerializableWrappers etc from raw
+   * values.
+   */
+  assignJSON(jsonValues: Array<unknown>) {
+    if (!Array.isArray(jsonValues)) {
+      throw new Error(
+        `Expected array in SArray.assignJSON(), got ${typeof jsonValues}`
+      );
+    }
+
+    for (let i = 0; i < Math.min(this.value.length, jsonValues.length); ++i) {
+      const currentValue = this.value[i];
+      if (shouldAssignJSON(currentValue, jsonValues[i])) {
+        currentValue.assignJSON(jsonValues[i]);
+      } else {
+        this.value[i] = jsonValues[i] as ValueT;
+      }
+    }
+
+    if (jsonValues.length < this.value.length) {
+      // If jsonValues has fewer elements, truncate value.
+      this.value.splice(jsonValues.length);
+    } else if (jsonValues.length > this.value.length) {
+      // Expand to the new length and assign / copy new elements.
+      const origLength = this.value.length;
+      this.value.length = jsonValues.length;
+      if (this.elementType) {
+        // If we know how to construct new elements, construct new elements up to
+        // the desired length, and assign to each element.
+        let element = new this.elementType();
+        for (let i = origLength; i < jsonValues.length; ++i) {
+          if (shouldAssignJSON(element, jsonValues[i])) {
+            element.assignJSON(jsonValues[i]);
+            this.value[i] = element;
+            element = new this.elementType();
+          } else {
+            this.value[i] = jsonValues[i] as ValueT;
+          }
+        }
+      } else {
+        // If we don't know how to construct new elements, we'll just assign
+        // the provided this.value past the desired length.
+        for (let i = origLength; i < jsonValues.length; ++i) {
+          this.value[i] = jsonValues[i] as ValueT;
+        }
+      }
+    }
+
+    mapSArray(this, (element) => {
+      if (!(element instanceof Serializable)) {
+        throw new Error('Array element does not extend Serializable');
+      }
+    });
   }
 
   /** Create a new instance of this wrapper class from a raw value. */
@@ -126,6 +184,7 @@ function mapSArray<
         e2.index = index;
         throw e2;
       } else {
+        console.log('nope');
         throw e;
       }
     }
@@ -186,6 +245,21 @@ export abstract class SArrayWithWrapper<ValueT> extends SerializableWrapper<
 
   toJSON() {
     return this.toSArray().toJSON();
+  }
+
+  /** Assigns elements from a JSON array.
+   *
+   * Equivalent to assigning to this.values directly. Unlike SArray, this method
+   * does NOT recursively hydrate SObjects etc, since the elements will be later
+   * wrapped by the wrapper type.
+   */
+  assignJSON(jsonValues: Array<ValueT>) {
+    if (!Array.isArray(jsonValues)) {
+      throw new Error(
+        `Expected array in SArray.assignJSON(), got ${typeof jsonValues}`
+      );
+    }
+    this.value.splice(0, this.value.length, ...jsonValues);
   }
 
   /** Returns an SArrayWithWrapper class that pads / truncates to the provided

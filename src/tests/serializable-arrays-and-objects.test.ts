@@ -53,4 +53,17 @@ describe('SArray and SObject', function () {
       times(10 * 10, () => 42)
     );
   });
+
+  test('JSON conversion', function () {
+    const obj1 = TestObjectB.with({
+      prop1: {prop3: ['hello', 'world']},
+    });
+    expect(obj1.prop1 instanceof TestObjectA);
+    expect(obj1.prop1.prop3).toStrictEqual(['hello', 'world']);
+
+    obj1.assignJSON({prop2: [{prop3: ['foo', 'bar', 'baz']}]});
+    expect(obj1.prop2).toHaveLength(1);
+    expect(obj1.prop2[0] instanceof TestObjectA);
+    expect(obj1.prop2[0].prop3).toStrictEqual(['foo', 'bar', 'baz']);
+  });
 });

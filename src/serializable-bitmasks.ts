@@ -100,6 +100,19 @@ export abstract class SBitmask extends SerializableWrapper<number> {
       ])
     );
   }
+
+  assignJSON(jsonValue: number | {[key: string | symbol]: number}): void {
+    if (typeof jsonValue === 'number') {
+      this.value = jsonValue;
+    } else if (typeof jsonValue === 'object') {
+      Object.assign(this, jsonValue);
+    } else {
+      throw new Error(
+        'Expected a number or an object in SBitmask.assignJSON(), ' +
+          `but got ${typeof jsonValue}`
+      );
+    }
+  }
 }
 
 function createSBitmaskClass(

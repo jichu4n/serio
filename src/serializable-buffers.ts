@@ -18,6 +18,29 @@ export class SBuffer extends SerializableWrapper<Buffer> {
   getSerializedLength() {
     return this.value.length;
   }
+
+  assignJSON(
+    jsonValue: {data: Array<number>; type: 'Buffer'} | Array<number> | Buffer
+  ) {
+    if (Buffer.isBuffer(jsonValue)) {
+      this.value = jsonValue;
+    } else if (
+      jsonValue &&
+      typeof jsonValue === 'object' &&
+      'data' in jsonValue &&
+      Array.isArray(jsonValue.data) &&
+      'type' in jsonValue &&
+      jsonValue.type === 'Buffer'
+    ) {
+      this.value = Buffer.from(jsonValue.data);
+    } else if (jsonValue && Array.isArray(jsonValue)) {
+      this.value = Buffer.from(jsonValue);
+    } else {
+      throw new Error(
+        `Invalid JSON value for SBuffer: ${JSON.stringify(jsonValue)}`
+      );
+    }
+  }
 }
 
 /** A Buffer encoded as a number N followed by N bytes. */
