@@ -1,5 +1,7 @@
 import {DeserializeOptions, SerializeOptions} from './serializable';
+import {getJsonFieldSettings} from './serializable-objects-internal';
 import {SerializableWrapper} from './serializable-wrapper';
+import {toJSON} from './utils';
 
 /** A numeric value that represents a bitmask of several fields.*/
 export abstract class SBitmask extends SerializableWrapper<number> {
@@ -93,12 +95,25 @@ export abstract class SBitmask extends SerializableWrapper<number> {
   }
 
   toJSON(): any {
-    return Object.fromEntries(
-      getSBitfieldSpecs(this).map(({propertyKey}) => [
-        propertyKey,
-        (this as any)[propertyKey],
-      ])
+    const jsonFieldSettings = getJsonFieldSettings(this);
+    jsonFieldSettings.excluded.add('wrapperType');
+    const result = Object.fromEntries(
+      Object.entries(this)
+        .filter(([propertyKey]) => !jsonFieldSettings.excluded.has(propertyKey))
+        .map(([propertyKey, value]) => [propertyKey, toJSON(value)])
     );
+    Object.assign(
+      result,
+      Object.fromEntries(
+        Array.from(jsonFieldSettings.included)
+          .filter((propertyKey) => !(propertyKey in result))
+          .map((propertyKey) => [
+            propertyKey,
+            toJSON((this as any)[propertyKey]),
+          ])
+      )
+    );
+    return result;
   }
 
   assignJSON(jsonValue: number | {[key: string | symbol]: number}): void {

@@ -1,4 +1,4 @@
-import {bitfield, SBitmask, SUInt8} from '..';
+import {bitfield, json, SBitmask, SUInt8} from '..';
 
 class Color8Bit extends SBitmask.of(SUInt8) {
   @bitfield(3)
@@ -17,7 +17,15 @@ class TestBooleanObject extends SBitmask.of(SUInt8) {
   field2 = 0;
 
   @bitfield(1)
+  @json(false)
   field3 = false;
+
+  field4 = 'hello';
+
+  @json(true)
+  get field5() {
+    return this.field1 || this.field2 || this.field3;
+  }
 }
 
 class TestInvalidObjectA extends SBitmask.of(SUInt8) {
@@ -70,7 +78,8 @@ describe('SBitmask', function () {
     expect(bm1.toJSON()).toStrictEqual({
       field1: true,
       field2: 0b001000,
-      field3: false,
+      field4: 'hello',
+      field5: true,
     });
   });
 

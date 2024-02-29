@@ -569,11 +569,12 @@ class MyBitmask extends SBitmask.of(SUInt8) {
   @bitfield(2)
   flag2 = false;
   @bitfield(6)
+  @json(false) // Exclude from JSON output
   unused = 0;
 }
 
 const bm1 = MyBitmask.of(0b11000000);
-console.log(bm1.toJSON()); // => {flag1: true, flag2: true, unused: 0}
+console.log(bm1.toJSON()); // => {flag1: true, flag2: true}
 bm1.flag1 = false;
 bm1.serialize(); // => Buffer.of(0b01000000)
 ```
