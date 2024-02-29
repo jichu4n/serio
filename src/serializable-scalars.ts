@@ -106,6 +106,20 @@ export function createSerializableScalarWrapperClass<ValueT>({
         toJSON() {
           return (enumType as any)[this.value] ?? this.value;
         }
+        assignJSON(jsonValue: ValueT | string) {
+          if (typeof jsonValue === 'string') {
+            // TypeScript generates a reverse mapping from label => value for
+            // numeric enums.
+            if (!(jsonValue in enumType)) {
+              throw new Error(
+                `Invalid label for enum ${enumType.constructor.name}: ${jsonValue}`
+              );
+            }
+            this.value = (enumType as any)[jsonValue];
+          } else {
+            this.value = jsonValue;
+          }
+        }
       };
     }
 

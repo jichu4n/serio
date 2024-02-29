@@ -47,8 +47,8 @@ export class SArray<ValueT extends Serializable> extends SerializableWrapper<
   /** Assigns elements from a JSON array.
    *
    * Conceptually equivalent to assigning to this.values directly, but
-   * recursively hydrates SObjects / SArrays / SerializableWrappers etc from raw
-   * values.
+   * recursively hydrates SObjects / SArrays / SerializableWrappers etc and
+   * invokes their assignJSON() to process JSON values.
    */
   assignJSON(jsonValues: Array<unknown>) {
     if (!Array.isArray(jsonValues)) {
@@ -68,7 +68,7 @@ export class SArray<ValueT extends Serializable> extends SerializableWrapper<
 
     if (jsonValues.length < this.value.length) {
       // If jsonValues has fewer elements, truncate value.
-      this.value.splice(jsonValues.length);
+      this.value.length = jsonValues.length;
     } else if (jsonValues.length > this.value.length) {
       // Expand to the new length and assign / copy new elements.
       const origLength = this.value.length;
@@ -95,9 +95,13 @@ export class SArray<ValueT extends Serializable> extends SerializableWrapper<
       }
     }
 
-    mapSArray(this, (element) => {
+    mapSArray(this, (element, index) => {
       if (!(element instanceof Serializable)) {
-        throw new Error('Array element does not extend Serializable');
+        throw new Error(
+          `Array element ${index} is of type ` +
+            ((element as any)?.constructor?.name ?? typeof element) +
+            ' which does not extend Serializable'
+        );
       }
     });
   }
@@ -249,17 +253,23 @@ export abstract class SArrayWithWrapper<ValueT> extends SerializableWrapper<
 
   /** Assigns elements from a JSON array.
    *
-   * Equivalent to assigning to this.values directly. Unlike SArray, this method
-   * does NOT recursively hydrate SObjects etc, since the elements will be later
-   * wrapped by the wrapper type.
+   * JSON values are processed with wrapperType.assignJSON().
    */
-  assignJSON(jsonValues: Array<ValueT>) {
-    if (!Array.isArray(jsonValues)) {
-      throw new Error(
-        `Expected array in SArray.assignJSON(), got ${typeof jsonValues}`
+  assignJSON(jsonValues: Array<unknown>) {
+    const array = this.toSArray();
+    if (array.value.length < jsonValues.length) {
+      array.value.push(
+        ...Array(jsonValues.length - array.value.length)
+          .fill(0)
+          .map(() => new this.wrapperType())
       );
     }
-    this.value.splice(0, this.value.length, ...jsonValues);
+    array.assignJSON(jsonValues);
+    this.value.splice(
+      0,
+      this.value.length,
+      ...array.value.map(({value}) => value)
+    );
   }
 
   /** Returns an SArrayWithWrapper class that pads / truncates to the provided
@@ -268,7 +278,9 @@ export abstract class SArrayWithWrapper<ValueT> extends SerializableWrapper<
    * Not to be invoked directly -- use SArray.of(wrapperType).ofLength(N).
    */
   static ofLength<ValueT extends Serializable>(length: number) {
-    throw new Error('Unimplemented');
+    throw new Error(
+      'Unimplemented - please use SArray.of(wrapperType).ofLength(n)'
+    );
   }
 
   /**  Constructs an SArray of wrappers around the current array of elements. */

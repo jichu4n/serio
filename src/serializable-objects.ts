@@ -98,20 +98,50 @@ export class SObject extends Serializable {
   /** Assign properties to this object from a JSON object.
    *
    * Conceptually equivalent to Object.assign(), but recursively hydrates
-   * SObjects / SArrays / SerializableWrappers etc from raw values.
+   * SObjects / SArrays / SerializableWrappers etc and invokes their
+   * assignJSON() to process JSON values.
    */
-  assignJSON(jsonValue: {[key: string | symbol]: unknown}) {
-    if (typeof jsonValue !== 'object' || jsonValue === null) {
+  assignJSON(jsonObject: {[key: string | symbol]: unknown}) {
+    if (typeof jsonObject !== 'object' || jsonObject === null) {
       throw new Error(
-        `Expected object in SObject.assignJSON(), got ${typeof jsonValue}`
+        `Expected object in SObject.assignJSON(), got ${typeof jsonObject}`
       );
     }
-    for (const [propertyKey, value] of Object.entries(jsonValue)) {
-      const currentValue = (this as any)[propertyKey] as unknown;
-      if (shouldAssignJSON(currentValue, value)) {
-        currentValue.assignJSON(value);
+    const fieldSpecs = getFieldSpecMap(this);
+    for (const [propertyKey, jsonValue] of Object.entries(jsonObject)) {
+      const wrapperType = fieldSpecs[propertyKey]?.wrapperType;
+      if (wrapperType) {
+        if (
+          jsonValue !== null &&
+          jsonValue !== undefined &&
+          jsonValue.constructor === wrapperType
+        ) {
+          (this as any)[propertyKey] = (
+            jsonValue as SerializableWrapper<any>
+          ).value;
+        } else {
+          const wrapper = new wrapperType();
+          wrapper.value = (this as any)[propertyKey];
+          if (!shouldAssignJSON(wrapper, jsonValue)) {
+            // SerializableWrapper classes should always implement assignJSON.
+            throw new SObjectError(
+              propertyKey,
+              new Error(
+                // @ts-expect-error
+                `Field wrapper class ${wrapper.constructor.name} does not support assignJSON`
+              )
+            );
+          }
+          wrapper.assignJSON(jsonValue);
+          (this as any)[propertyKey] = wrapper.value;
+        }
       } else {
-        (this as any)[propertyKey] = value;
+        const currentValue = (this as any)[propertyKey];
+        if (shouldAssignJSON(currentValue, jsonValue)) {
+          currentValue.assignJSON(jsonValue);
+        } else {
+          (this as any)[propertyKey] = jsonValue;
+        }
       }
     }
   }
@@ -242,6 +272,8 @@ interface SObjectFieldSpec<ValueT = any> {
 interface SObjectMetadata {
   /** List of serializable fields, in declaration order. */
   fieldSpecs: Array<SObjectFieldSpec>;
+  /** Field specs indexed by property name. */
+  fieldSpecMap: {[key: string | symbol]: SObjectFieldSpec};
   /** Name of all serializable fields as a set. */
   propertyKeys: Set<string | symbol>;
 }
@@ -266,24 +298,36 @@ function registerField<ValueT>(
     }
     metadata.propertyKeys.add(propertyKey);
     metadata.fieldSpecs.push(fieldSpec);
+    metadata.fieldSpecMap[propertyKey] = fieldSpec;
   } else {
     const newMetadata: SObjectMetadata = {
       fieldSpecs: [fieldSpec],
+      fieldSpecMap: {[propertyKey]: fieldSpec},
       propertyKeys: new Set<string | symbol>([propertyKey]),
     };
     targetPrototype[SOBJECT_METADATA_KEY] = newMetadata;
   }
 }
 
-/** Extract SObjectFieldSpec's defined on a SObject. */
-function getFieldSpecs(targetInstance: any) {
+/** Extract SObjectMetadata defined on an SObject. */
+function getSObjectMetadata<ObjectT extends SObject>(
+  targetInstance: ObjectT
+): SObjectMetadata | null {
   return (
-    (
-      Object.getPrototypeOf(targetInstance)[SOBJECT_METADATA_KEY] as
-        | SObjectMetadata
-        | undefined
-    )?.fieldSpecs ?? []
+    (Object.getPrototypeOf(targetInstance)[SOBJECT_METADATA_KEY] as
+      | SObjectMetadata
+      | undefined) ?? null
   );
+}
+
+/** Extract SObjectFieldSpec's defined on a SObject. */
+function getFieldSpecs<ObjectT extends SObject>(targetInstance: ObjectT) {
+  return getSObjectMetadata(targetInstance)?.fieldSpecs ?? [];
+}
+
+/** Extract SObjectFieldMap defined on a SObject. */
+function getFieldSpecMap<ObjectT extends SObject>(targetInstance: ObjectT) {
+  return getSObjectMetadata(targetInstance)?.fieldSpecMap ?? {};
 }
 
 /** Get the Serializable value corresponding to an SObject field. */

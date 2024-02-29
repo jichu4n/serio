@@ -7,9 +7,15 @@ import {
   SObject,
   SStringNT,
   SUInt16BE,
+  SUInt8,
   Serializable,
 } from '../';
 import {ThrowingSerializable} from './throwing-serializable';
+
+enum TestEnum {
+  ZERO = 0,
+  ONE = 1,
+}
 
 describe('SArray', function () {
   test('create', function () {
@@ -184,6 +190,22 @@ describe('SArrayWithWrapper', function () {
     expect(arr2.toJSON()).toStrictEqual(['foo', 'bar', 'baz']);
     arr2.assignJSON(['wombat']);
     expect(arr2.toJSON()).toStrictEqual(['wombat']);
+
+    const arr3 = SArray.of(SUInt8.enum(TestEnum)).of([
+      TestEnum.ZERO,
+      TestEnum.ONE,
+    ]);
+    expect(arr3.toJSON()).toStrictEqual(['ZERO', 'ONE']);
+    arr3.assignJSON([TestEnum.ZERO, TestEnum.ONE, 'ONE']);
+    expect(arr3.value).toStrictEqual([
+      TestEnum.ZERO,
+      TestEnum.ONE,
+      TestEnum.ONE,
+    ]);
+    expect(arr3.toJSON()).toStrictEqual(['ZERO', 'ONE', 'ONE']);
+    arr3.assignJSON(['ONE', 0]);
+    expect(arr3.value).toStrictEqual([TestEnum.ONE, TestEnum.ZERO]);
+    expect(arr3.toJSON()).toStrictEqual(['ONE', 'ZERO']);
   });
 
   test('fixed length', function () {
@@ -235,6 +257,10 @@ describe('SArrayWithWrapper', function () {
 
     arr1.assignJSON([10, 20]);
     expect(arr1.toJSON()).toStrictEqual([10, 20, 0]);
+
+    const arr2 = new (SArray.of(SInt8.enum(TestEnum)).ofLength(3))();
+    arr2.assignJSON([1, 'ONE']);
+    expect(arr2.toJSON()).toStrictEqual(['ONE', 'ONE', 'ZERO']);
   });
 
   test('error handling', function () {

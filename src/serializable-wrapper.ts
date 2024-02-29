@@ -9,7 +9,7 @@ export abstract class SerializableWrapper<ValueT> extends Serializable {
     return toJSON(this.value);
   }
 
-  assignJSON(jsonValue: ValueT) {
+  assignJSON<JsonValueT extends ValueT>(jsonValue: JsonValueT) {
     this.value = jsonValue;
   }
 

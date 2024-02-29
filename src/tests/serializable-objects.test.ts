@@ -147,6 +147,14 @@ describe('SObject', function () {
       prop3: 'FOO!',
       prop4: 'ONE',
     });
+    obj1.assignJSON({prop4: 'ZERO'});
+    expect(obj1.prop4).toStrictEqual(TestEnum.ZERO);
+    expect(obj1.toJSON()).toStrictEqual({
+      prop1: 100,
+      prop2: 50,
+      prop3: 'FOO!',
+      prop4: 'ZERO',
+    });
 
     const obj2 = TestObjectB.with({firstName: 'Jane', lastName: 'Doe'});
     expect(obj2.toJSON()).toStrictEqual({
