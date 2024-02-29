@@ -69,7 +69,9 @@ export class SObject extends Serializable {
    * class B extends SObject {
    *   @field() a = new A();
    * }
-   * const b = B.with({a: {prop1: 300}});
+   * // The following are equivalent:
+   * const b1 = B.with({a: {prop1: 300}});
+   * const b2 = B.with({a: A.with({prop1: 300})});
    * ```
    */
   static with<T extends SObject>(
