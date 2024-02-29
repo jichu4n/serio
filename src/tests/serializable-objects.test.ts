@@ -1,5 +1,6 @@
 import {
   field,
+  json,
   SObject,
   SObjectError,
   SString,
@@ -52,6 +53,36 @@ class TestObjectC extends SObject {
 
   @field()
   objectB: TestObjectB = new TestObjectB();
+}
+
+/** Example object with JSON setting annotations. */
+class TestObjectD extends SObject {
+  prop1 = 0;
+
+  @json(true)
+  prop2 = 0;
+
+  @json(false)
+  prop3 = 0;
+
+  @json(false)
+  @field(SUInt8)
+  prop4 = 0;
+
+  @field(SUInt8)
+  @json(false)
+  prop5 = 0;
+
+  @json(true)
+  get prop6() {
+    return this.prop1 + this.prop2;
+  }
+
+  @json(false)
+  @field(SUInt8)
+  get prop7() {
+    return this.prop1 + this.prop2;
+  }
 }
 
 /** Object that contains a ThrowingSerializable. */
@@ -202,6 +233,21 @@ describe('SObject', function () {
     expect(() => obj3.assignJSON('not an object')).toThrow(Error);
     // @ts-expect-error
     expect(() => obj3.assignJSON(null)).toThrow(Error);
+  });
+
+  test('JSON setting annotations', function () {
+    const obj1 = TestObjectD.with({
+      prop1: 1,
+      prop2: 2,
+      prop3: 3,
+      prop4: 4,
+      prop5: 5,
+    });
+    expect(obj1.toJSON()).toStrictEqual({
+      prop1: 1,
+      prop2: 2,
+      prop6: 3,
+    });
   });
 
   test('error handling', function () {

@@ -39,24 +39,39 @@ export class SObject extends Serializable {
     );
   }
 
-  toJSON(): any {
-    const serializableFields = this.mapValuesToSerializable();
-    return Object.fromEntries(
-      Object.entries(this).map(([propertyKey, value]) => {
-        try {
-          return [
-            propertyKey,
-            toJSON(
-              propertyKey in serializableFields
-                ? serializableFields[propertyKey]
-                : value
-            ),
-          ];
-        } catch (e: any) {
-          throw new SObjectError(propertyKey, e);
-        }
-      })
+  toJSON(): {[key: string | symbol]: unknown} {
+    const jsonFieldSettings = getJsonFieldSettings(this);
+    const serializableFields = this.toSerializableMap();
+    const result = Object.fromEntries(
+      Object.entries(this)
+        .filter(([propertyKey]) => !jsonFieldSettings.excluded.has(propertyKey))
+        .map(([propertyKey, value]) => {
+          try {
+            return [
+              propertyKey,
+              toJSON(
+                propertyKey in serializableFields
+                  ? serializableFields[propertyKey]
+                  : value
+              ),
+            ];
+          } catch (e: any) {
+            throw new SObjectError(propertyKey, e);
+          }
+        })
     );
+    Object.assign(
+      result,
+      Object.fromEntries(
+        Array.from(jsonFieldSettings.included)
+          .filter((propertyKey) => !(propertyKey in result))
+          .map((propertyKey) => [
+            propertyKey,
+            toJSON((this as any)[propertyKey]),
+          ])
+      )
+    );
+    return result;
   }
 
   /** Create a new instance with the provided initial properties.
@@ -89,7 +104,7 @@ export class SObject extends Serializable {
    * Fields defined with `@field()` are preserved as-is, and field defined with
    * `@field(wrapper)` are wrapped in their respective wrapper types.
    */
-  mapValuesToSerializable(): {[propertyKey: string]: Serializable} {
+  toSerializableMap(): {[propertyKey: string]: Serializable} {
     return Object.fromEntries(
       getFieldSpecs(this).map((fieldSpec) => [
         fieldSpec.propertyKey,
@@ -278,6 +293,32 @@ export function field<WrappedValueT, ValueT extends WrappedValueT>(
   } as SerializableFieldDecorator<ValueT>;
 }
 
+/** Decorator for SObject fields indicating whether they should be included in JSON. */
+export function json<WrappedValueT, ValueT extends WrappedValueT>(
+  shouldIncludeInJson: boolean
+) {
+  return function (
+    value: undefined | Function,
+    context:
+      | ClassFieldDecoratorContext
+      | ClassGetterDecoratorContext
+      | ClassSetterDecoratorContext
+  ) {
+    context.addInitializer(function () {
+      registerFieldJsonSetting(this, context.name, shouldIncludeInJson);
+    });
+    switch (context.kind) {
+      case 'field':
+        return (initialValue: ValueT) => initialValue;
+      case 'getter':
+      case 'setter':
+        return;
+      default:
+        throw new Error('@field() should only be used on class properties');
+    }
+  } as SerializableFieldDecorator<ValueT>;
+}
+
 /** Key for metadata stored on an SObject's prototype. */
 const SOBJECT_METADATA_KEY = Symbol('__sobjectMetadata');
 
@@ -297,6 +338,10 @@ interface SObjectMetadata {
   fieldSpecMap: {[key: string | symbol]: SObjectFieldSpec};
   /** Name of all serializable fields as a set. */
   propertyKeys: Set<string | symbol>;
+  /** Properties explicitly included in JSON. */
+  jsonIncludedPropertyKeys: Set<string | symbol>;
+  /** Perperties explicitly excluded from JSON. */
+  jsonExcludedPropertyKeys: Set<string | symbol>;
 }
 
 /** Registers a serializable property in the metadata of an SObject. */
@@ -325,8 +370,51 @@ function registerField<ValueT>(
       fieldSpecs: [fieldSpec],
       fieldSpecMap: {[propertyKey]: fieldSpec},
       propertyKeys: new Set<string | symbol>([propertyKey]),
+      jsonIncludedPropertyKeys: new Set<string | symbol>(),
+      jsonExcludedPropertyKeys: new Set<string | symbol>(),
     };
     targetPrototype[SOBJECT_METADATA_KEY] = newMetadata;
+  }
+}
+
+/** Register JSON setting for an SObject field. */
+function registerFieldJsonSetting<ValueT>(
+  targetInstance: any,
+  propertyKey: string | symbol,
+  shouldIncludeInJson: boolean
+) {
+  const targetPrototype = Object.getPrototypeOf(targetInstance);
+  let metadata = targetPrototype[SOBJECT_METADATA_KEY] as
+    | SObjectMetadata
+    | undefined;
+  if (!metadata) {
+    metadata = {
+      fieldSpecs: [],
+      fieldSpecMap: {},
+      propertyKeys: new Set<string | symbol>(),
+      jsonIncludedPropertyKeys: new Set<string | symbol>(
+        shouldIncludeInJson ? [propertyKey] : []
+      ),
+      jsonExcludedPropertyKeys: new Set<string | symbol>(
+        shouldIncludeInJson ? [] : [propertyKey]
+      ),
+    };
+    targetPrototype[SOBJECT_METADATA_KEY] = metadata;
+  }
+  if (shouldIncludeInJson) {
+    if (metadata.jsonExcludedPropertyKeys.has(propertyKey)) {
+      throw new Error(
+        `Field ${propertyKey.toString()} has conflicting JSON settings`
+      );
+    }
+    metadata.jsonIncludedPropertyKeys.add(propertyKey);
+  } else {
+    if (metadata.jsonIncludedPropertyKeys.has(propertyKey)) {
+      throw new Error(
+        `Field ${propertyKey.toString()} has conflicting JSON settings`
+      );
+    }
+    metadata.jsonExcludedPropertyKeys.add(propertyKey);
   }
 }
 
@@ -349,6 +437,17 @@ function getFieldSpecs<ObjectT extends SObject>(targetInstance: ObjectT) {
 /** Extract SObjectFieldMap defined on a SObject. */
 function getFieldSpecMap<ObjectT extends SObject>(targetInstance: ObjectT) {
   return getSObjectMetadata(targetInstance)?.fieldSpecMap ?? {};
+}
+
+/** Extract JSON field settings defined on a SObject. */
+function getJsonFieldSettings<ObjectT extends SObject>(
+  targetInstance: ObjectT
+) {
+  const metadata = getSObjectMetadata(targetInstance);
+  return {
+    included: metadata?.jsonIncludedPropertyKeys ?? new Set<string | symbol>(),
+    excluded: metadata?.jsonExcludedPropertyKeys ?? new Set<string | symbol>(),
+  };
 }
 
 /** Get the Serializable value corresponding to an SObject field. */
