@@ -148,6 +148,7 @@ class MyObject extends SObject {
   type = MyType.FOO;
 }
 
+// Convert to / from JSON:
 JSON.stringify(new MyObject()); // => {"type": "FOO"}
 JSON.stringify(MyObject.with({type: MyType.FOO})); // => {"type": "FOO"}
 JSON.stringify(MyObject.with({type: 'FOO'})); // => {"type": "FOO"}
@@ -398,11 +399,19 @@ class Position extends SObject {
   @field(SUInt32LE)
   y = 0;
 
-  // Properties without a decorator are ignored for serialization, but will
-  // be included in JSON output by default (JSON.stringify(obj) or obj.toJSON()).
-  // Use `@json(false)` to exclude them.
+  // Undecorated object properties are ignored during serialization /
+  // deserialization, but are included in JSON output by default
+  // (JSON.stringify(obj) or obj.toJSON()). Use `@json(false)` to
+  // exclude them.
   @json(false)
   foo = 100;
+
+  // Computed properties are excluded from JSON output by default. Use
+  // `@json(true)` to include them.
+  @json(true)
+  get distFromOrigin() {
+    return Math.sqrt(this.x * this.x + this.y * this.y);
+  }
 }
 
 // Create instance with default values:
@@ -457,12 +466,12 @@ class Color extends SObject {
 }
 ```
 
-However, note that you should **avoid using `@field()` with both regular
+**Note: Avoid using `@field()` with both regular
 properties and getters / setters in the same `SObject` class**. This is due to a
 quirk in the ES6 decorator spec: decorator initializers for getters / setters
 always run before regular properties, so if a class contains a mixure of
 decorated properties and decorated getters / setters, the resulting
-serialization order will likely be different from the declaration order in the
+serialization order may be different from the declaration order in the
 code.
 
 Example combining objects and arrays:
@@ -492,7 +501,8 @@ const arr1 = SArray.of(_.times(5, () => new ExampleObject()));
 console.log(arr1.value[0].prop3[0][0]); // => 'hello'
 ```
 
-Example showing JSON conversion:
+To create / update nested `SObject`s and `SArray`s with JSON / POJO values, use
+`with()` and `assignJSON()`:
 
 ```ts
 class Segment extends SObject {
@@ -501,17 +511,18 @@ class Segment extends SObject {
   @field()
   p2 = new Point();
 }
-// Initialize with point instances
-const s1 = Segment.with({
-  p1: Point.with({x: 1, y: 1}),
-  p2: Point.with({x: 2, y: 2}),
-});
-// Initialize with JSON
+// Create nested SObject's with JSON / POJO value:
 const s2 = Segment.with({
   p1: {x: 1, y: 1},
   p2: {x: 2, y: 2},
 });
-// Partial update with JSON
+// The above is equivalent to:
+// const s1 = Segment.with({
+//   p1: Point.with({x: 1, y: 1}),
+//   p2: Point.with({x: 2, y: 2}),
+// });
+
+// Perform partial update on nested SObject with JSON / POJO value:
 s2.assignJSON({p2: {x: 10}});
 console.log(s2.toJSON()); // => {p1: {x: 1, y: 1}, p2: {x: 10, y: 2}}
 ```
@@ -674,19 +685,23 @@ serio is distributed under the Apache License v2.
 
 ### 2.0.0
 
-- Introduce `assignJSON()` to most `Serializable` classes. This greatly simplies
-  the construction of nested `SObject`, `SArray` and other serializable values.
+- New APIs to simplify the construction of nested `SObject`s and `SArray`s from
+  JSON / POJO values:
+  - Introduce the `assignJSON()` method to most `Serializable` classes as a
+    canonical method for "hydrating" a `Serializable` from a JSON / POJO value.
   - `SObject.with()` now take advantages of `assignJSON()`, allowing inline
-    construction of nested `SObject`s through JSON or raw JS values.
-- Introduce the `@json(boolean)` decorator to simplify customization of JSON
-  output on `SObject` and `SBitmask` objects.
-- **Breaking change**: `SObject.assignFromSerializable()` has been renamed to
-  `SObject.assignSerializableMap()` for consistency with `assignJSON()`, and
-  passing in unknown properties in the argument will now throw an error instead
-  of being silently ignored.
-- **Breaking change**: `SObject.mapValuesToSerializable()` has been renamed to
-  `SObject.toSerializableMap()` for consistency with `toJSON()`.
-- **Breaking change**: `SBitmask.toJSON()` previously only returned fields
-  decorated with `@bitfield()`. Its behavior has been updated to be consistent
-  with `SObject.toJSON()`: it now returns all properties on the object, with
-  support for field-level control with `@json(boolean)`.
+    construction of nested `SObject`s and `SArray`s from JSON / POJO values.
+- New API for converting `SObject`s and `SBitmask`s to JSON / POJO values:
+  - Introduce the `@json(boolean)` decorator to control whether a field should
+    appear in the output of `toJSON()` without having to override the latter.
+- Breaking changes:
+  - `SObject.assignFromSerializable()` has been renamed to
+    `SObject.assignSerializableMap()` for consistency with `assignJSON()`, and
+    passing in unknown properties in the argument will now throw an error instead
+    of being silently ignored.
+  - `SObject.mapValuesToSerializable()` has been renamed to
+    `SObject.toSerializableMap()` for consistency with `toJSON()`.
+  - `SBitmask.toJSON()` previously only returned fields decorated with
+    `@bitfield()`. Its behavior has been updated to be consistent with
+    `SObject.toJSON()`: it now returns all properties on the object, with
+    support for field-level control with `@json(boolean)`.
