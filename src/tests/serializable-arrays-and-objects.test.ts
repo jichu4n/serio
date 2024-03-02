@@ -65,5 +65,12 @@ describe('SArray and SObject', function () {
     expect(obj1.prop2).toHaveLength(1);
     expect(obj1.prop2[0] instanceof TestObjectA);
     expect(obj1.prop2[0].prop3).toStrictEqual(['foo', 'bar', 'baz']);
+
+    const arr1 = SArray.ofLength(2, TestObjectA).ofJSON([{prop1: [42]}]);
+    expect(arr1.value[0] instanceof TestObjectA);
+    const arr1Json = arr1.toJSON();
+    expect(arr1Json).toHaveLength(2);
+    expect(arr1Json[0].prop1).toStrictEqual([42]);
+    expect(arr1Json[1].prop1).toHaveLength(10);
   });
 });

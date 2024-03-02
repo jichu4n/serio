@@ -150,8 +150,8 @@ class MyObject extends SObject {
 
 // Convert to / from JSON:
 JSON.stringify(new MyObject()); // => {"type": "FOO"}
-JSON.stringify(MyObject.with({type: MyType.FOO})); // => {"type": "FOO"}
-JSON.stringify(MyObject.with({type: 'FOO'})); // => {"type": "FOO"}
+JSON.stringify(MyObject.withJSON({type: MyType.FOO})); // => {"type": "FOO"}
+JSON.stringify(MyObject.withJSON({type: 'FOO'})); // => {"type": "FOO"}
 ```
 
 ## Strings
@@ -359,6 +359,14 @@ arr1.deserialize(Buffer.of(101, 102, 103));
 console.log(arr1.value); // [101, 102, 103]
 ```
 
+To create / update nested `SObject`s and `SArray`s with JSON / POJO values, use
+`ofJSON()` and `assignJSON()`:
+
+```ts
+const arr = SArray.ofLength(3, MyObject).ofJSON([{...}, {...}, {...}]);
+arr.assignJSON([{prop1: '...'}, {...}, {...}]);
+```
+
 ## Objects
 
 serio provides the
@@ -499,7 +507,7 @@ console.log(arr1.value[0].prop3[0][0]); // => 'hello'
 ```
 
 To create / update nested `SObject`s and `SArray`s with JSON / POJO values, use
-`with()` and `assignJSON()`:
+`withJSON()` and `assignJSON()`:
 
 ```ts
 class Segment extends SObject {
@@ -509,7 +517,7 @@ class Segment extends SObject {
   p2 = new Point();
 }
 // Create nested SObject's from JSON / POJO value:
-const s2 = Segment.with({
+const s2 = Segment.withJSON({
   p1: {x: 1, y: 1},
   p2: {x: 2, y: 2},
 });
@@ -707,7 +715,7 @@ serio is distributed under the Apache License v2.
   JSON / POJO values:
   - Introduce the `assignJSON()` method to most `Serializable` classes as a
     canonical method for hydrating a `Serializable` from a JSON / POJO value.
-  - `SObject.with()` now take advantages of `assignJSON()`, allowing inline
+  - Introduce `SObject.withJSON()` and `SArrayWithWrapper.ofJSON()`, allowing inline
     construction of nested `SObject`s and `SArray`s from JSON / POJO values.
 - New API for converting `SObject`s and `SBitmask`s to JSON / POJO values:
   - Introduce the `@json(boolean)` decorator to control whether a field should
