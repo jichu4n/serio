@@ -13,7 +13,7 @@ import {
   registerFieldJsonSetting,
 } from './serializable-objects-internal';
 import {SerializableWrapper} from './serializable-wrapper';
-import {shouldAssignJSON, toJSON} from './utils';
+import {canAssignJSON, toJSON} from './utils';
 
 /** Serializable record where fields are defined via `@field()`. */
 export class SObject extends Serializable {
@@ -81,28 +81,20 @@ export class SObject extends Serializable {
     return result;
   }
 
-  /** Create a new instance with the provided initial properties.
-   *
-   * This method uses assignJSON() to either assign or hydrate JSON values for
-   * nested Serializable values. For example, you can do the following:
-   * ```
-   * class A extends SObject {
-   *   @field(SUInt8) prop1: number;
-   * }
-   * class B extends SObject {
-   *   @field() a = new A();
-   * }
-   * // The following are equivalent:
-   * const b1 = B.with({a: {prop1: 300}});
-   * const b2 = B.with({a: A.with({prop1: 300})});
-   * ```
-   */
-  static with<T extends SObject>(
+  /** Create a new instance with the provided initial properties. */
+  static with<T extends SObject>(this: new () => T, props: Partial<T> = {}): T {
+    const instance = new this();
+    Object.assign(instance, props);
+    return instance;
+  }
+
+  /** Similar to with(), but uses assignJSON() instead of Object.assign(). */
+  static withJSON<T extends SObject>(
     this: new () => T,
-    props: {[P in keyof T]?: T[P] | unknown} = {}
+    json: {[key: string | symbol]: unknown}
   ): T {
     const instance = new this();
-    instance.assignJSON(props);
+    instance.assignJSON(json);
     return instance;
   }
 
@@ -137,42 +129,32 @@ export class SObject extends Serializable {
    * ```
    */
   assignJSON(jsonObject: {[key: string | symbol]: unknown}) {
-    if (typeof jsonObject !== 'object' || jsonObject === null) {
+    if (!jsonObject || jsonObject.constructor !== Object) {
       throw new Error(
-        `Expected object in SObject.assignJSON(), got ${typeof jsonObject}`
+        `Expected plain object in SObject.assignJSON(), got ${typeof jsonObject}`
       );
     }
     const fieldSpecs = getFieldSpecMap(this);
     for (const [propertyKey, jsonValue] of Object.entries(jsonObject)) {
       const wrapperType = fieldSpecs[propertyKey]?.wrapperType;
       if (wrapperType) {
-        if (
-          jsonValue !== null &&
-          jsonValue !== undefined &&
-          jsonValue.constructor === wrapperType
-        ) {
-          (this as any)[propertyKey] = (
-            jsonValue as SerializableWrapper<any>
-          ).value;
-        } else {
-          const wrapper = new wrapperType();
-          wrapper.value = (this as any)[propertyKey];
-          if (!shouldAssignJSON(wrapper, jsonValue)) {
-            // SerializableWrapper classes should always implement assignJSON.
-            throw new SObjectError(
-              propertyKey,
-              new Error(
-                // @ts-expect-error
-                `Field wrapper class ${wrapper.constructor.name} does not support assignJSON`
-              )
-            );
-          }
-          wrapper.assignJSON(jsonValue);
-          (this as any)[propertyKey] = wrapper.value;
+        const wrapper = new wrapperType();
+        wrapper.value = (this as any)[propertyKey];
+        if (!canAssignJSON(wrapper)) {
+          // SerializableWrapper classes should always implement assignJSON.
+          throw new SObjectError(
+            propertyKey,
+            new Error(
+              // @ts-expect-error
+              `Field wrapper class ${wrapper.constructor.name} does not support assignJSON`
+            )
+          );
         }
+        wrapper.assignJSON(jsonValue);
+        (this as any)[propertyKey] = wrapper.value;
       } else {
         const currentValue = (this as any)[propertyKey];
-        if (shouldAssignJSON(currentValue, jsonValue)) {
+        if (canAssignJSON(currentValue)) {
           currentValue.assignJSON(jsonValue);
         } else {
           (this as any)[propertyKey] = jsonValue;
@@ -202,7 +184,7 @@ export class SObject extends Serializable {
           new Error(`Unknown property ${propertyKey}`)
         );
       }
-      if (fieldSpecMap.wrapperType) {
+      if (fieldSpec.wrapperType) {
         if (!(serializableValue instanceof SerializableWrapper)) {
           throw new SObjectError(
             propertyKey.toString(),

@@ -193,7 +193,7 @@ describe('SObject', function () {
       lastName: 'Doe',
     });
 
-    const obj3 = TestObjectC.with({
+    const obj3 = TestObjectC.withJSON({
       prop1: 42,
       objectB: {firstName: 'John', lastName: 'Doe'},
     });

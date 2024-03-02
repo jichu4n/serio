@@ -51,12 +51,8 @@ describe('SArray', function () {
     arr1.value.forEach((el) => expect(el instanceof Serializable));
 
     // Extra non-serializable element
-    expect(() => arr1.assignJSON(['world', 100, [300, 400]])).toThrow(
-      SArrayError
-    );
-    expect(() => arr1.assignJSON(['world', 100, [300], 'foo'])).toThrow(
-      SArrayError
-    );
+    expect(() => arr1.assignJSON(['world', 100, [300, 400]])).toThrow();
+    expect(() => arr1.assignJSON(['world', 100, [300], 'foo'])).toThrow();
 
     arr1.assignJSON([]);
     expect(arr1.toJSON()).toStrictEqual([]);

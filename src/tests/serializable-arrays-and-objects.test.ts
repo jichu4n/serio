@@ -55,7 +55,7 @@ describe('SArray and SObject', function () {
   });
 
   test('JSON conversion', function () {
-    const obj1 = TestObjectB.with({
+    const obj1 = TestObjectB.withJSON({
       prop1: {prop3: ['hello', 'world']},
     });
     expect(obj1.prop1 instanceof TestObjectA);
