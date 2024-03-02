@@ -709,7 +709,7 @@ serio is distributed under the Apache License v2.
 
 ## Changelog
 
-### 2.0.0
+### 2.0
 
 - New APIs to simplify the construction of nested `SObject`s and `SArray`s from
   JSON / POJO values:
