@@ -46,7 +46,7 @@ export class SObject extends Serializable {
     );
   }
 
-  toJSON(): {[key: string | symbol]: unknown} {
+  toJSON(): {[key: string | symbol]: any} {
     const jsonFieldSettings = getJsonFieldSettings(this);
     const serializableFields = this.toSerializableMap();
     const result = Object.fromEntries(

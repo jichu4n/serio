@@ -4,8 +4,8 @@ Fluent binary serialization / deserialization in TypeScript.
 
 If you need to work with binary protocols and file formats, or manipulate C/C++
 `struct`s and arrays from TypeScript, this library is for you. It provides an
-ergonomic object-oriented framework for defining TypeScript classes that can
-serialize and deserialize to binary formats.
+ergonomic API for defining TypeScript classes that can serialize and deserialize
+to binary formats.
 
 ## Quickstart
 
@@ -133,7 +133,7 @@ The full list of provided integer types:
 ## Enums
 
 All of the integer wrappers above also support looking up an enum label for
-JSON-ification. For example:
+conversion to JSON. For example:
 
 ```ts
 enum MyType {
@@ -368,9 +368,8 @@ defining serializable objects that are conceptually equivalent to C/C++
 
 To define a serializable object:
 
-1. Create a TypeScript class that derives from
-   [`SObject`](https://jichu4n.github.io/serio/classes/SObject.html), i.e.
-   `class X extends SObject`.
+1. Define a class that extends
+   [`SObject`](https://jichu4n.github.io/serio/classes/SObject.html).
 2. Use the [`@field()`
    decorator](https://jichu4n.github.io/serio/functions/field.html) to annotate
    class properties that should be serialized / deserialized:
@@ -390,9 +389,8 @@ Basic example:
  *     };
  */
 class Position extends SObject {
-  // This will wrap x using SUInt32LE for serialization / deserialization
-  // behind the scenes, but allows it to be manipulated as a normal class
-  // property of type number.
+  // This will serialize / deserialize x as an SUInt32LE behind the scenes,
+  // but allows it to be manipulated as a normal numeric property.
   @field(SUInt32LE)
   x = 0;
 
@@ -400,9 +398,8 @@ class Position extends SObject {
   y = 0;
 
   // Undecorated object properties are ignored during serialization /
-  // deserialization, but are included in JSON output by default
-  // (JSON.stringify(obj) or obj.toJSON()). Use `@json(false)` to
-  // exclude them.
+  // deserialization, but are included in JSON output by default.
+  // Use `@json(false)` to exclude them.
   @json(false)
   foo = 100;
 
@@ -450,8 +447,8 @@ class Color extends SObject {
   // encodes red / green / blue components as an 8-bit color value in the
   // format RRR GGG BB.
   @field(SUInt8)
-  // Getters / setters aren't included by default in JSON output
-  // (JSON.stringify(obj) or obj.toJSON()). Use `@json(true)` to include them.
+  // Getters / setters aren't included in JSON output by default. Use
+  // `@json(true)` to include them.
   @json(true)
   get value() {
     return (
@@ -511,7 +508,7 @@ class Segment extends SObject {
   @field()
   p2 = new Point();
 }
-// Create nested SObject's with JSON / POJO value:
+// Create nested SObject's from JSON / POJO value:
 const s2 = Segment.with({
   p1: {x: 1, y: 1},
   p2: {x: 2, y: 2},
@@ -622,9 +619,23 @@ class MyType extends Serializable {
     return 1 + this.name.getSerializedLength(opts);
   }
 
-  /** Optionally, define how this class should be JSONified. */
+  /** Optionally, define how to convert this value to JSON.
+   *
+   * SObject.toJSON() and SArray.toJSON() will recursively invoke the toJSON()
+   * method of their elements.
+   */
   toJSON() {
     return {x: this.x, name: this.name};
+  }
+
+  /** Optionally, define how to parse / hydrate this value from JSON.
+   *
+   * SObject.assignJSON() and SArray.assignJSON() will recursively invoke the
+   * assignJSON() method of their elements.
+   */
+  assignJSON(jsonValue: {x: string; name: string}) {
+    this.x = jsonValue.x;
+    this.name = jsonValue.name;
   }
 }
 
@@ -662,9 +673,16 @@ class MyWrapperType extends SerializableWrapper<number> {
   getSerializedLength(opts?: SerializeOptions): number {
     /* ... */
   }
+  // Define `toJSON()` and `assignJSON()` as above
+  toJSON() {
+    /* ... */
+  }
+  assignJSON(jsonValue: unknown) {
+    /* ... */
+  }
 }
 
-// MyWrapperType can be constructed similar to other wrappers such as `SInt8`:
+// MyWrapperType can be used in the same way as built-in wrappers such as `SInt8`:
 const obj1 = new MyWrapperType();
 const obj2 = MyWrapperType.from(buffer);
 const obj3 = MyWrapperType.of(42);
@@ -688,7 +706,7 @@ serio is distributed under the Apache License v2.
 - New APIs to simplify the construction of nested `SObject`s and `SArray`s from
   JSON / POJO values:
   - Introduce the `assignJSON()` method to most `Serializable` classes as a
-    canonical method for "hydrating" a `Serializable` from a JSON / POJO value.
+    canonical method for hydrating a `Serializable` from a JSON / POJO value.
   - `SObject.with()` now take advantages of `assignJSON()`, allowing inline
     construction of nested `SObject`s and `SArray`s from JSON / POJO values.
 - New API for converting `SObject`s and `SBitmask`s to JSON / POJO values:

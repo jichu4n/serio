@@ -272,17 +272,6 @@ export abstract class SArrayWithWrapper<ValueT> extends SerializableWrapper<
     );
   }
 
-  /** Returns an SArrayWithWrapper class that pads / truncates to the provided
-   * length.
-   *
-   * Not to be invoked directly -- use SArray.of(wrapperType).ofLength(N).
-   */
-  static ofLength<ValueT extends Serializable>(length: number) {
-    throw new Error(
-      'Unimplemented - please use SArray.of(wrapperType).ofLength(n)'
-    );
-  }
-
   /**  Constructs an SArray of wrappers around the current array of elements. */
   toSArray() {
     const cls =
@@ -296,6 +285,16 @@ export abstract class SArrayWithWrapper<ValueT> extends SerializableWrapper<
         return wrapper;
       })
     );
+  }
+
+  /** Create a new instance of this wrapper class from a raw value. */
+  static of<ArrayValueT, WrapperT extends SerializableWrapper<ArrayValueT>>(
+    this: new () => WrapperT,
+    value: ArrayValueT
+  ): WrapperT {
+    const instance = new this();
+    instance.assignJSON(value);
+    return instance;
   }
 }
 
