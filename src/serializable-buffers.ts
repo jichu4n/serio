@@ -45,7 +45,7 @@ export class SBuffer extends SerializableWrapper<Buffer> {
 
 /** A Buffer encoded as a number N followed by N bytes. */
 export abstract class SDynamicBuffer<
-  LengthT extends SerializableWrapper<number>
+  LengthT extends SerializableWrapper<number>,
 > extends SBuffer {
   /** Length type, to be provided by child classes. */
   protected abstract lengthType: new () => LengthT;

@@ -157,7 +157,7 @@ export class SArray<ValueT extends Serializable> extends SerializableWrapper<
  */
 function mapSArray<
   ValueT extends Serializable,
-  FnT extends (element: ValueT, index: number) => any
+  FnT extends (element: ValueT, index: number) => any,
 >(sarray: SArray<ValueT>, fn: FnT): Array<ReturnType<FnT>> {
   let elements: Array<ValueT>;
   if (sarray.length !== undefined && sarray.value.length < sarray.length) {
@@ -300,7 +300,7 @@ export abstract class SArrayWithWrapper<ValueT> extends SerializableWrapper<
 
 /** Error augmented by SArray with index information. */
 export class SArrayError<
-  ValueT extends Serializable = Serializable
+  ValueT extends Serializable = Serializable,
 > extends Error {
   constructor(message: string, {cause}: {cause: Error}) {
     super(message);

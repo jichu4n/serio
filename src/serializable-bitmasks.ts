@@ -143,9 +143,10 @@ type BitfieldDecorator<ValueT> = {
     value: Function,
     context: ClassGetterDecoratorContext | ClassSetterDecoratorContext
   ): void;
-  (value: undefined, context: ClassFieldDecoratorContext): (
-    initialValue: ValueT
-  ) => ValueT;
+  (
+    value: undefined,
+    context: ClassFieldDecoratorContext
+  ): (initialValue: ValueT) => ValueT;
 };
 
 /** Decorator for bitfields in an SBitmask. */

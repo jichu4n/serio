@@ -24,8 +24,5 @@ export abstract class SerializableWrapper<ValueT> extends Serializable {
   }
 }
 
-export type WrappedValueT<WrapperT> = WrapperT extends SerializableWrapper<
-  infer ValueT
->
-  ? ValueT
-  : never;
+export type WrappedValueT<WrapperT> =
+  WrapperT extends SerializableWrapper<infer ValueT> ? ValueT : never;
