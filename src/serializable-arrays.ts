@@ -125,6 +125,15 @@ export class SArray<ValueT extends Serializable> extends SerializableWrapper<
         .map(() => new elementType());
       length = length;
       elementType = elementType;
+      /** Create a new instance of this wrapper class from a raw value. */
+      static ofJSON<
+        ValueT extends Serializable,
+        SArrayT extends SArray<ValueT>,
+      >(this: new () => SArrayT, jsonValues: Array<unknown>): SArrayT {
+        const instance = new this();
+        instance.assignJSON(jsonValues);
+        return instance;
+      }
     };
   }
 }
@@ -270,10 +279,10 @@ export abstract class SArrayWithWrapper<ValueT> extends SerializableWrapper<
   /** Create a new instance of this wrapper class from a raw value. */
   static ofJSON<ValueT, SArrayT extends SArrayWithWrapper<ValueT>>(
     this: new () => SArrayT,
-    value: Array<unknown>
+    jsonValues: Array<unknown>
   ): SArrayT {
     const instance = new this();
-    instance.assignJSON(value);
+    instance.assignJSON(jsonValues);
     return instance;
   }
 }

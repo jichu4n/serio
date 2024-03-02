@@ -94,6 +94,12 @@ describe('SArray', function () {
 
     arr1.assignJSON([10, 20]);
     expect(arr1.toJSON()).toStrictEqual([10, 20, 0]);
+
+    const arr2 = SArray.ofLength(3, SInt8).ofJSON([1, 2]);
+    expect(arr2.toJSON()).toStrictEqual([1, 2, 0]);
+
+    const arr3 = SArray.ofLength(3, SInt8).ofJSON([1, 2, 3, 4]);
+    expect(arr3.toJSON()).toStrictEqual([1, 2, 3]);
   });
 
   test('error handling', function () {
@@ -202,6 +208,9 @@ describe('SArrayWithWrapper', function () {
     arr3.assignJSON(['ONE', 0]);
     expect(arr3.value).toStrictEqual([TestEnum.ONE, TestEnum.ZERO]);
     expect(arr3.toJSON()).toStrictEqual(['ONE', 'ZERO']);
+
+    const arr4 = SArray.of(SUInt8.enum(TestEnum)).ofJSON([TestEnum.ONE, 'ONE']);
+    expect(arr4.toJSON()).toStrictEqual(['ONE', 'ONE']);
   });
 
   test('fixed length', function () {
@@ -257,6 +266,11 @@ describe('SArrayWithWrapper', function () {
     const arr2 = new (SArray.of(SInt8.enum(TestEnum)).ofLength(3))();
     arr2.assignJSON([1, 'ONE']);
     expect(arr2.toJSON()).toStrictEqual(['ONE', 'ONE', 'ZERO']);
+
+    const arr3 = SArray.of(SUInt8.enum(TestEnum))
+      .ofLength(3)
+      .ofJSON([TestEnum.ONE, 'ONE']);
+    expect(arr3.toJSON()).toStrictEqual(['ONE', 'ONE', 'ZERO']);
   });
 
   test('error handling', function () {
