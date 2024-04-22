@@ -177,7 +177,6 @@ function mapSArray<
         e2.index = index;
         throw e2;
       } else {
-        console.log('nope');
         throw e;
       }
     }
