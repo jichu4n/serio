@@ -1,5 +1,8 @@
 # serio
 
+[![NPM Version][npm-version-image]][npm-url]
+[![Build Status][build-status-image]][github-url]
+
 Fluent binary serialization / deserialization in TypeScript.
 
 If you need to work with binary protocols and file formats, or manipulate C/C++
@@ -731,3 +734,8 @@ serio is distributed under the Apache License v2.
     `@bitfield()`. Its behavior has been updated to be consistent with
     `SObject.toJSON()`: it now returns all properties on the object, with
     support for field-level control with `@json(boolean)`.
+
+[npm-url]: https://npmjs.org/package/serio
+[npm-version-image]: https://badgen.net/npm/v/serio
+[github-url]: https://github.com/jichu4n/serio
+[build-status-image]: https://github.com/jichu4n/serio/actions/workflows/build.yaml/badge.svg
