@@ -64,7 +64,7 @@ pos1.y = pos1.x + 10;
 const buf = pos1.serialize(); // => Buffer
 // Get the byte size of the instance's serialized form:
 const size = pos1.getSerializedLength();  // => 8
-// Deserialize into an existing instance, returning number of bytes red
+// Deserialize into an existing instance, returning number of bytes read
 const bytesRead = pos1.deserialize(buffer.subarray(...));  // => 8
 ```
 
