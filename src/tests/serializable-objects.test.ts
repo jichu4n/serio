@@ -229,9 +229,9 @@ describe('SObject', function () {
       },
     });
 
-    // @ts-expect-error
+    // @ts-expect-error assign non-object value
     expect(() => obj3.assignJSON('not an object')).toThrow(Error);
-    // @ts-expect-error
+    // @ts-expect-error assignment null
     expect(() => obj3.assignJSON(null)).toThrow(Error);
   });
 
@@ -259,7 +259,6 @@ describe('SObject', function () {
     } catch (e) {
       const e2 = e as SObjectError;
       expect(e2.propertyKey).toStrictEqual('prop2');
-      // @ts-ignore
       expect(e2.cause.message).toBe('test error');
     }
 
@@ -269,7 +268,6 @@ describe('SObject', function () {
     } catch (e) {
       const e2 = e as SObjectError;
       expect(e2.propertyKey).toStrictEqual('prop2');
-      // @ts-ignore
       expect(e2.cause.message).toBe('test error');
     }
 
@@ -279,7 +277,6 @@ describe('SObject', function () {
     } catch (e) {
       const e2 = e as SObjectError;
       expect(e2.propertyKey).toStrictEqual('prop2');
-      // @ts-ignore
       expect(e2.cause.message).toBe('test error');
     }
   });

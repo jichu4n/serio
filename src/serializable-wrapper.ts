@@ -5,7 +5,7 @@ import {toJSON} from './utils';
 export abstract class SerializableWrapper<ValueT> extends Serializable {
   abstract value: ValueT;
 
-  toJSON(): any {
+  toJSON() {
     return toJSON(this.value);
   }
 
