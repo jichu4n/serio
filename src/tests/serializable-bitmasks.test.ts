@@ -90,13 +90,13 @@ describe('SBitmask', function () {
     }).toThrow();
     expect(() => {
       const bm2 = new TestInvalidObjectB();
-      // @ts-expect-error
+      // @ts-expect-error assign value of wrong type
       bm2.prop = 'hello';
       bm2.serialize();
     }).toThrow();
     expect(() => {
       const bm3 = new TestInvalidObjectB();
-      // @ts-expect-error
+      // @ts-expect-error assign null
       bm3.prop = null;
       bm3.serialize();
     }).toThrow();
