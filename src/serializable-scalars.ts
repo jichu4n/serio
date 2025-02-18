@@ -81,7 +81,7 @@ export class SInt32LE extends createSerializableScalarWrapperClass({
 }) {}
 
 /** Factory for Serializable wrappers for basic data types. */
-export function createSerializableScalarWrapperClass<ValueT>({
+export function createSerializableScalarWrapperClass<ValueT extends number>({
   readFn,
   writeFn,
   serializedLength,
@@ -96,7 +96,7 @@ export function createSerializableScalarWrapperClass<ValueT>({
     value: ValueT = defaultValue;
 
     /** Return a variant of this class that looks up an enum value for toJSON(). */
-    static enum(enumType: Object) {
+    static enum(enumType: object) {
       return class extends createSerializableScalarWrapperClass<ValueT>({
         readFn,
         writeFn,
@@ -104,7 +104,7 @@ export function createSerializableScalarWrapperClass<ValueT>({
         defaultValue,
       }) {
         toJSON() {
-          return (enumType as any)[this.value] ?? this.value;
+          return (enumType as Record<ValueT, string>)[this.value] ?? this.value;
         }
         assignJSON(jsonValue: ValueT | string) {
           if (typeof jsonValue === 'string') {
@@ -115,7 +115,7 @@ export function createSerializableScalarWrapperClass<ValueT>({
                 `Invalid label for enum ${enumType.constructor.name}: ${jsonValue}`
               );
             }
-            this.value = (enumType as any)[jsonValue];
+            this.value = (enumType as Record<string, ValueT>)[jsonValue];
           } else {
             this.value = jsonValue;
           }

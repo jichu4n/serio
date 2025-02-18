@@ -40,7 +40,7 @@ export class SArray<ValueT extends Serializable> extends SerializableWrapper<
     ).reduce((a, b) => a + b, 0);
   }
 
-  toJSON(): Array<any> {
+  toJSON() {
     return mapSArray(this, toJSON);
   }
 
@@ -144,10 +144,10 @@ export class SArray<ValueT extends Serializable> extends SerializableWrapper<
  * This should really be a private method of SArray, but TypeScript doesn't
  * allow classes with anonymous child classes to contain private methods.
  */
-function mapSArray<
-  ValueT extends Serializable,
-  FnT extends (element: ValueT, index: number) => any,
->(sarray: SArray<ValueT>, fn: FnT): Array<ReturnType<FnT>> {
+function mapSArray<ValueT extends Serializable, ResultT>(
+  sarray: SArray<ValueT>,
+  fn: (element: ValueT, index: number) => ResultT
+): Array<ResultT> {
   let elements: Array<ValueT>;
   if (sarray.length !== undefined && sarray.value.length < sarray.length) {
     elements = [
@@ -298,7 +298,7 @@ export class SArrayError<
   /** The original error. */
   cause: Error;
   /** Indicates this is an SArrayError. */
-  isSArrayError: true = true;
+  isSArrayError = true as const;
   /** The element that raised the error. */
   element!: ValueT;
   /** Index of the element that raised the error. */
