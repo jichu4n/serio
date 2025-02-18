@@ -7,7 +7,9 @@
   "scripts": {
     "build": "tsc",
     "build:docs": "rm -rf ./docs/ && typedoc",
-    "lint": "prettier --check .",
+    "lint:prettier": "prettier --check .",
+    "lint:eslint": "eslint . --report-unused-disable-directives --max-warnings 0",
+    "lint": "npm run lint:prettier && npm run lint:eslint",
     "test": "jest",
     "prepack": "npm run lint && npm run build && npm test && rm -r ./dist/tests",
     "prepublishOnly": "./src/tests/package-test.sh"

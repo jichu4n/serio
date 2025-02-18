@@ -1,12 +1,15 @@
-import pluginJs from '@eslint/js';
+import js from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-/** @type {import('eslint').Linter.Config[]} */
-export default [
-  {files: ['**/*.{js,mjs,cjs,ts}']},
-  {ignores: ['dist/']},
-  {languageOptions: {globals: globals.node}},
-  pluginJs.configs.recommended,
-  ...tseslint.configs.recommended,
-];
+export default tseslint.config(
+  {ignores: ['dist']},
+  {
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    files: ['**/*.{js,mjs,cjs,ts}'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.node,
+    },
+  }
+);
