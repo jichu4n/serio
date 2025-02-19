@@ -26,8 +26,8 @@ export class SObject extends Serializable {
     for (let i = 0; i < fieldSpecs.length; ++i) {
       const {propertyKey, wrapperType} = fieldSpecs[i];
       if (wrapperType) {
-        (this as any)[propertyKey] = (
-          array.value[i] as SerializableWrapper<any>
+        (this as Record<string | symbol, unknown>)[propertyKey] = (
+          array.value[i] as SerializableWrapper<unknown>
         ).value;
       }
     }
@@ -46,7 +46,7 @@ export class SObject extends Serializable {
     );
   }
 
-  toJSON(): {[key: string | symbol]: any} {
+  toJSON(): object {
     const jsonFieldSettings = getJsonFieldSettings(this);
     const serializableFields = this.toSerializableMap();
     const result = Object.fromEntries(
@@ -62,7 +62,7 @@ export class SObject extends Serializable {
                   : value
               ),
             ];
-          } catch (e: any) {
+          } catch (e) {
             throw new SObjectError(propertyKey, e);
           }
         })
@@ -74,7 +74,7 @@ export class SObject extends Serializable {
           .filter((propertyKey) => !(propertyKey in result))
           .map((propertyKey) => [
             propertyKey,
-            toJSON((this as any)[propertyKey]),
+            toJSON((this as Record<string | symbol, unknown>)[propertyKey]),
           ])
       )
     );
@@ -145,7 +145,7 @@ export class SObject extends Serializable {
           throw new SObjectError(
             propertyKey,
             new Error(
-              // @ts-expect-error
+              // @ts-expect-error `wrapper` has type `never` here.
               `Field wrapper class ${wrapper.constructor.name} does not support assignJSON`
             )
           );
