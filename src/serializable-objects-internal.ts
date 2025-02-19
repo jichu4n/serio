@@ -5,7 +5,7 @@ import {SerializableWrapper} from './serializable-wrapper';
 export const SOBJECT_METADATA_KEY = Symbol('__sobjectMetadata');
 
 /** Metadata stored for each serializable property on an SObject's prototype. */
-export interface SObjectFieldSpec<ValueT = any> {
+export interface SObjectFieldSpec<ValueT = unknown> {
   /** The name of the property. */
   propertyKey: string | symbol;
   /** The wrapper type for the property, if defined with @field(wrapper). */
@@ -28,7 +28,7 @@ export interface SObjectMetadata {
 
 /** Registers a serializable property in the metadata of an SObject. */
 export function registerField<ValueT>(
-  targetInstance: any,
+  targetInstance: unknown,
   propertyKey: string | symbol,
   wrapperType?: new () => SerializableWrapper<ValueT>
 ) {
@@ -60,8 +60,8 @@ export function registerField<ValueT>(
 }
 
 /** Register JSON setting for an SObject field. */
-export function registerFieldJsonSetting<ValueT>(
-  targetInstance: any,
+export function registerFieldJsonSetting(
+  targetInstance: unknown,
   propertyKey: string | symbol,
   shouldIncludeInJson: boolean
 ) {
@@ -102,7 +102,7 @@ export function registerFieldJsonSetting<ValueT>(
 
 /** Extract SObjectMetadata defined on an SObject. */
 export function getSObjectMetadata(
-  targetInstance: any
+  targetInstance: unknown
 ): SObjectMetadata | null {
   return (
     (Object.getPrototypeOf(targetInstance)[SOBJECT_METADATA_KEY] as
@@ -112,17 +112,17 @@ export function getSObjectMetadata(
 }
 
 /** Extract SObjectFieldSpec's defined on a SObject. */
-export function getFieldSpecs(targetInstance: any) {
+export function getFieldSpecs(targetInstance: object) {
   return getSObjectMetadata(targetInstance)?.fieldSpecs ?? [];
 }
 
 /** Extract SObjectFieldMap defined on a SObject. */
-export function getFieldSpecMap(targetInstance: any) {
+export function getFieldSpecMap(targetInstance: object) {
   return getSObjectMetadata(targetInstance)?.fieldSpecMap ?? {};
 }
 
 /** Extract JSON field settings defined on a SObject. */
-export function getJsonFieldSettings(targetInstance: any) {
+export function getJsonFieldSettings(targetInstance: object) {
   const metadata = getSObjectMetadata(targetInstance);
   return {
     included: metadata?.jsonIncludedPropertyKeys ?? new Set<string | symbol>(),
@@ -132,10 +132,12 @@ export function getJsonFieldSettings(targetInstance: any) {
 
 /** Get the Serializable value corresponding to an SObject field. */
 export function getFieldOrWrapper(
-  targetInstance: any,
+  targetInstance: unknown,
   {propertyKey, wrapperType}: SObjectFieldSpec
 ) {
-  const value = targetInstance[propertyKey];
+  const value = (targetInstance as Record<string | symbol, unknown>)[
+    propertyKey
+  ];
   if (wrapperType) {
     const wrapper = new wrapperType();
     wrapper.value = value;
