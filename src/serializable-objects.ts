@@ -26,8 +26,8 @@ export class SObject extends Serializable {
     for (let i = 0; i < fieldSpecs.length; ++i) {
       const {propertyKey, wrapperType} = fieldSpecs[i];
       if (wrapperType) {
-        (this as any)[propertyKey] = (
-          array.value[i] as SerializableWrapper<any>
+        (this as Record<string | symbol, unknown>)[propertyKey] = (
+          array.value[i] as SerializableWrapper<unknown>
         ).value;
       }
     }
@@ -46,7 +46,7 @@ export class SObject extends Serializable {
     );
   }
 
-  toJSON(): {[key: string | symbol]: any} {
+  toJSON(): object {
     const jsonFieldSettings = getJsonFieldSettings(this);
     const serializableFields = this.toSerializableMap();
     const result = Object.fromEntries(
@@ -62,7 +62,7 @@ export class SObject extends Serializable {
                   : value
               ),
             ];
-          } catch (e: any) {
+          } catch (e) {
             throw new SObjectError(propertyKey, e);
           }
         })
@@ -74,7 +74,7 @@ export class SObject extends Serializable {
           .filter((propertyKey) => !(propertyKey in result))
           .map((propertyKey) => [
             propertyKey,
-            toJSON((this as any)[propertyKey]),
+            toJSON((this as Record<string | symbol, unknown>)[propertyKey]),
           ])
       )
     );
@@ -139,25 +139,27 @@ export class SObject extends Serializable {
       const wrapperType = fieldSpecs[propertyKey]?.wrapperType;
       if (wrapperType) {
         const wrapper = new wrapperType();
-        wrapper.value = (this as any)[propertyKey];
+        wrapper.value = (this as Record<string | symbol, unknown>)[propertyKey];
         if (!canAssignJSON(wrapper)) {
           // SerializableWrapper classes should always implement assignJSON.
           throw new SObjectError(
             propertyKey,
             new Error(
-              // @ts-expect-error
+              // @ts-expect-error `wrapper` has type `never` here.
               `Field wrapper class ${wrapper.constructor.name} does not support assignJSON`
             )
           );
         }
         wrapper.assignJSON(jsonValue);
-        (this as any)[propertyKey] = wrapper.value;
+        (this as Record<string | symbol, unknown>)[propertyKey] = wrapper.value;
       } else {
-        const currentValue = (this as any)[propertyKey];
+        const currentValue = (this as Record<string | symbol, unknown>)[
+          propertyKey
+        ];
         if (canAssignJSON(currentValue)) {
           currentValue.assignJSON(jsonValue);
         } else {
-          (this as any)[propertyKey] = jsonValue;
+          (this as Record<string | symbol, unknown>)[propertyKey] = jsonValue;
         }
       }
     }
@@ -194,9 +196,11 @@ export class SObject extends Serializable {
             )
           );
         }
-        (this as any)[propertyKey] = serializableValue.value;
+        (this as Record<string | symbol, unknown>)[propertyKey] =
+          serializableValue.value;
       } else {
-        (this as any)[propertyKey] = serializableValue;
+        (this as Record<string | symbol, unknown>)[propertyKey] =
+          serializableValue;
       }
     }
   }
@@ -211,18 +215,17 @@ function toSArray(targetInstance: SObject): SArray<Serializable> {
   );
 }
 
-function wrapSArrayErrorAsSObjectError<FnT extends () => any>(
+function wrapSArrayErrorAsSObjectError<ResultT>(
   targetInstance: SObject,
-  fn: FnT
-): ReturnType<FnT> {
+  fn: () => ResultT
+): ResultT {
   try {
     return fn();
   } catch (e) {
     if (e instanceof SArrayError) {
       const propertyKey =
         getFieldSpecs(targetInstance)[e.index].propertyKey.toString();
-      // @ts-ignore
-      const cause: Error = e.cause;
+      const cause = e.cause;
       const e2 = new SObjectError(propertyKey, cause);
       throw e2;
     } else {
@@ -233,7 +236,9 @@ function wrapSArrayErrorAsSObjectError<FnT extends () => any>(
 
 /** Error augmented by SObject with property information. */
 export class SObjectError extends Error {
-  constructor(propertyKey: string, cause: any) {
+  constructor(propertyKey: string, rawCause: unknown) {
+    const cause =
+      rawCause instanceof Error ? rawCause : new Error(String(rawCause));
     super(`Error in field ${propertyKey}: ${cause.message}`);
     Object.setPrototypeOf(this, SObjectError.prototype);
     this.cause = cause;
@@ -241,13 +246,14 @@ export class SObjectError extends Error {
     this.stack = cause.stack;
   }
   /** The original error. */
-  cause: any;
+  cause: Error;
   /** The property that raised the error. */
   propertyKey: string;
 }
 
 type SerializableFieldDecorator<ValueT> = {
   (
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     value: Function,
     context: ClassGetterDecoratorContext | ClassSetterDecoratorContext
   ): void;
@@ -262,6 +268,7 @@ export function field<WrappedValueT, ValueT extends WrappedValueT>(
   wrapperType?: new () => SerializableWrapper<WrappedValueT>
 ) {
   return function (
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     value: undefined | Function,
     context:
       | ClassFieldDecoratorContext
@@ -288,6 +295,7 @@ export function json<WrappedValueT, ValueT extends WrappedValueT>(
   shouldIncludeInJson: boolean
 ) {
   return function (
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     value: undefined | Function,
     context:
       | ClassFieldDecoratorContext

@@ -1,13 +1,15 @@
 {
   "name": "serio",
-  "version": "2.0.1",
+  "version": "3.0.0-rc1",
   "description": "Fluent binary serialization / deserialization in TypeScript",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "build:docs": "rm -rf ./docs/ && typedoc",
-    "lint": "prettier --check .",
+    "lint:prettier": "prettier --check .",
+    "lint:eslint": "eslint . --report-unused-disable-directives --max-warnings 0",
+    "lint": "npm run lint:prettier && npm run lint:eslint",
     "test": "jest",
     "prepack": "npm run lint && npm run build && npm test && rm -r ./dist/tests",
     "prepublishOnly": "./src/tests/package-test.sh"
@@ -33,15 +35,19 @@
     "unpack"
   ],
   "devDependencies": {
+    "@eslint/js": "^9.17.0",
     "@types/jest": "^29.5.12",
     "@types/lodash": "^4.17.0",
     "@types/node": "^22.0.0",
+    "eslint": "^9.17.0",
+    "globals": "^15.13.0",
     "jest": "^29.7.0",
     "lodash": "^4.17.21",
     "prettier": "^3.2.5",
     "ts-jest": "^29.1.2",
     "typedoc": "^0.27.2",
-    "typescript": "^5.4.3"
+    "typescript": "^5.4.3",
+    "typescript-eslint": "^8.18.0"
   },
   "dependencies": {
     "iconv-lite": "^0.6.3",

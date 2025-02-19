@@ -21,9 +21,9 @@ describe('SBuffer', function () {
     expect(buf1.toJSON()).toEqual({data: [9, 10, 11, 12, 13], type: 'Buffer'});
     buf1.assignJSON([]);
     expect(buf1.toJSON()).toEqual({data: [], type: 'Buffer'});
-    // @ts-expect-error
+    // @ts-expect-error assign non-Buffer value
     expect(() => buf1.assignJSON({})).toThrow();
-    // @ts-expect-error
+    // @ts-expect-error assign null
     expect(() => buf1.assignJSON(null)).toThrow();
   });
 });

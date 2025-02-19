@@ -117,7 +117,6 @@ describe('SArray', function () {
       expect(e2.isSArrayError).toStrictEqual(true);
       expect(e2.element).toStrictEqual(arr1.value[1]);
       expect(e2.index).toStrictEqual(1);
-      // @ts-ignore
       expect(e2.cause.message).toBe('test error');
     }
 
@@ -129,7 +128,6 @@ describe('SArray', function () {
       expect(e2.isSArrayError).toStrictEqual(true);
       expect(e2.element).toStrictEqual(arr1.value[1]);
       expect(e2.index).toStrictEqual(1);
-      // @ts-ignore
       expect(e2.cause.message).toBe('test error');
     }
 
@@ -141,7 +139,6 @@ describe('SArray', function () {
       expect(e2.isSArrayError).toStrictEqual(true);
       expect(e2.element).toStrictEqual(arr1.value[1]);
       expect(e2.index).toStrictEqual(1);
-      // @ts-ignore
       expect(e2.cause.message).toBe('test error');
     }
   });
@@ -275,7 +272,7 @@ describe('SArrayWithWrapper', function () {
 
   test('error handling', function () {
     const c1 = class extends SObject {};
-    // @ts-expect-error
+    // @ts-expect-error invalid argument type
     expect(() => SArray.of(c1)).toThrow(Error);
   });
 });
