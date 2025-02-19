@@ -712,6 +712,10 @@ serio is distributed under the Apache License v2.
 
 ## Changelog
 
+### 3.0
+
+- Enable ESLint and improve type signatures.
+
 ### 2.0
 
 - New APIs to simplify the construction of nested `SObject`s and `SArray`s from
