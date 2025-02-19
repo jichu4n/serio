@@ -55,8 +55,11 @@ export abstract class SBitmask extends SerializableWrapper<number> {
       const {propertyKey, length} = bitfields[i];
       const fieldMask = 2 ** length - 1;
       // Checks the type of the property is valid.
-      getValueType(this, propertyKey);
-      wrapper.value |= (((this as any)[propertyKey] | 0) & fieldMask) << offset;
+      getValueType(this as Record<string | symbol, unknown>, propertyKey);
+      wrapper.value |=
+        ((Number((this as Record<string | symbol, unknown>)[propertyKey]) | 0) &
+          fieldMask) <<
+        offset;
       offset += length;
     }
     return wrapper.value;
@@ -70,8 +73,13 @@ export abstract class SBitmask extends SerializableWrapper<number> {
     for (let i = bitfields.length - 1; i >= 0; --i) {
       const {propertyKey, length} = bitfields[i];
       const fieldMask = 2 ** length - 1;
-      const valueType = getValueType(this, propertyKey);
-      (this as any)[propertyKey] = valueType((newValue >> offset) & fieldMask);
+      const valueType = getValueType(
+        this as Record<string | symbol, unknown>,
+        propertyKey
+      );
+      (this as Record<string | symbol, unknown>)[propertyKey] = valueType(
+        (newValue >> offset) & fieldMask
+      );
       offset += length;
     }
   }
@@ -94,7 +102,7 @@ export abstract class SBitmask extends SerializableWrapper<number> {
     return wrapper.getSerializedLength(opts);
   }
 
-  toJSON(): any {
+  toJSON() {
     const jsonFieldSettings = getJsonFieldSettings(this);
     jsonFieldSettings.excluded.add('wrapperType');
     const result = Object.fromEntries(
@@ -109,7 +117,7 @@ export abstract class SBitmask extends SerializableWrapper<number> {
           .filter((propertyKey) => !(propertyKey in result))
           .map((propertyKey) => [
             propertyKey,
-            toJSON((this as any)[propertyKey]),
+            toJSON((this as Record<string | symbol, unknown>)[propertyKey]),
           ])
       )
     );
@@ -140,6 +148,7 @@ function createSBitmaskClass(
 
 type BitfieldDecorator<ValueT> = {
   (
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     value: Function,
     context: ClassGetterDecoratorContext | ClassSetterDecoratorContext
   ): void;
@@ -152,6 +161,7 @@ type BitfieldDecorator<ValueT> = {
 /** Decorator for bitfields in an SBitmask. */
 export function bitfield<ValueT extends number | boolean>(length: number) {
   return function (
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     value: undefined | Function,
     context:
       | ClassFieldDecoratorContext
@@ -193,8 +203,8 @@ interface SBitmaskMetadata {
 }
 
 /** Registers a bitfield in the metadata of an SBitmask. */
-function registerBitfield<ValueT>(
-  targetInstance: any,
+function registerBitfield(
+  targetInstance: unknown,
   propertyKey: string | symbol,
   length: number
 ) {
@@ -222,7 +232,7 @@ function registerBitfield<ValueT>(
 }
 
 /** Extract SBitfieldSpec's defined on a SObject. */
-function getSBitfieldSpecs(targetInstance: any) {
+function getSBitfieldSpecs(targetInstance: unknown) {
   return (
     (
       Object.getPrototypeOf(targetInstance)[SBITMASK_METADATA_KEY] as
@@ -251,7 +261,10 @@ function validateLength(
 }
 
 /** Returns the constructor for a bitfield value. */
-function getValueType(targetInstance: any, propertyKey: string | symbol) {
+function getValueType(
+  targetInstance: Record<string | symbol, unknown>,
+  propertyKey: string | symbol
+) {
   const value = targetInstance[propertyKey];
   switch (typeof value) {
     case 'number':
