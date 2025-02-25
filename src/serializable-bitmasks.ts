@@ -102,7 +102,8 @@ export abstract class SBitmask extends SerializableWrapper<number> {
     return wrapper.getSerializedLength(opts);
   }
 
-  toJSON() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  toJSON(): any {
     const jsonFieldSettings = getJsonFieldSettings(this);
     jsonFieldSettings.excluded.add('wrapperType');
     const result = Object.fromEntries(

@@ -18,7 +18,8 @@ export class ThrowingSerializable extends Serializable {
     return 1;
   }
 
-  toJSON() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  toJSON(): any {
     throw new Error(this.errorMessage);
   }
 }
