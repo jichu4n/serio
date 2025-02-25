@@ -103,7 +103,8 @@ export function createSerializableScalarWrapperClass<ValueT extends number>({
         serializedLength,
         defaultValue,
       }) {
-        toJSON() {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        toJSON(): any {
           return (enumType as Record<ValueT, string>)[this.value] ?? this.value;
         }
         assignJSON(jsonValue: ValueT | string) {
