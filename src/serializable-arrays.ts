@@ -40,7 +40,8 @@ export class SArray<ValueT extends Serializable> extends SerializableWrapper<
     ).reduce((a, b) => a + b, 0);
   }
 
-  toJSON() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  toJSON(): any {
     return mapSArray(this, toJSON);
   }
 
@@ -235,7 +236,8 @@ export abstract class SArrayWithWrapper<ValueT> extends SerializableWrapper<
     return this.toSArray().getSerializedLength(opts);
   }
 
-  toJSON() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  toJSON(): any {
     return this.toSArray().toJSON();
   }
 

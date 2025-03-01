@@ -5,7 +5,8 @@ import {toJSON} from './utils';
 export abstract class SerializableWrapper<ValueT> extends Serializable {
   abstract value: ValueT;
 
-  toJSON() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  toJSON(): any {
     return toJSON(this.value);
   }
 

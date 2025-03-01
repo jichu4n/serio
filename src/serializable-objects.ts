@@ -46,7 +46,8 @@ export class SObject extends Serializable {
     );
   }
 
-  toJSON(): object {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  toJSON(): any {
     const jsonFieldSettings = getJsonFieldSettings(this);
     const serializableFields = this.toSerializableMap();
     const result = Object.fromEntries(
