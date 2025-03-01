@@ -714,7 +714,8 @@ serio is distributed under the Apache License v2.
 
 ### 3.0
 
-- Enable ESLint and improve type signatures.
+- Enable ESLint and improve type signatures. This could introduce minor incompatibilities
+  in TypeScript.
 
 ### 2.0
 
